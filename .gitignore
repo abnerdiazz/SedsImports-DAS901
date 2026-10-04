@@ -1,0 +1,14 @@
+## Visual Studio / .NET
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.userprefs
+*.log
+TestResults/
+.idea/
+.vscode/
+
+## Fotografías subidas mientras se prueba el sistema
+SedsImports.Web/wwwroot/uploads/vehiculos/
