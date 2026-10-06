@@ -1,0 +1,19 @@
+@* Mensajes de éxito o error que envían los controladores con TempData (patrón Post-Redirect-Get). *@
+@{
+    var exito = TempData["MensajeExito"] as string;
+    var error = TempData["MensajeError"] as string;
+}
+@if (!string.IsNullOrEmpty(exito))
+{
+    <div class="mensaje mensaje-exito" role="status">
+        <span>@exito</span>
+        <button type="button" data-cerrar-mensaje aria-label="Cerrar">&times;</button>
+    </div>
+}
+@if (!string.IsNullOrEmpty(error))
+{
+    <div class="mensaje mensaje-error" role="alert">
+        <span>@error</span>
+        <button type="button" data-cerrar-mensaje aria-label="Cerrar">&times;</button>
+    </div>
+}
