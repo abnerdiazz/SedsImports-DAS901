@@ -1,0 +1,48 @@
+@model InicioViewModel
+@* Panel de la asistente administrativa: documentación pendiente y vehículos disponibles para ofrecer. *@
+<div class="kpis">
+    <a class="kpi" asp-controller="Vehiculos" asp-action="Index"><div class="kpi-valor">@Model.Conteos.Total</div><div class="kpi-etiqueta">Total de vehículos</div></a>
+    <a class="kpi" asp-controller="Documentacion" asp-action="Index" asp-route-filtro="Pendiente"><div class="kpi-valor c-naranja">@Model.DocumentacionPendiente</div><div class="kpi-etiqueta">Documentación pendiente</div></a>
+    <a class="kpi" asp-controller="Documentacion" asp-action="Index" asp-route-filtro="Completa"><div class="kpi-valor c-verde">@Model.DocumentacionCompleta</div><div class="kpi-etiqueta">Documentación completa</div></a>
+    <a class="kpi" asp-controller="Vehiculos" asp-action="Index" asp-route-estado="Disponible"><div class="kpi-valor c-verde">@Model.Disponibles.Count</div><div class="kpi-etiqueta">Disponibles actualmente</div></a>
+</div>
+
+<section class="tarjeta">
+    <h2>Vehículos por estado</h2>
+    <partial name="_BarraEstados" model="Model.Conteos" />
+</section>
+
+<div class="rejilla-mitad" style="margin-top:16px">
+    <section class="tarjeta">
+        <div class="tarjeta-titulo">
+            <h2>Documentación pendiente</h2>
+            <a class="btn btn-secundario btn-sm" asp-controller="Documentacion" asp-action="Index">Ir a Documentación</a>
+        </div>
+        <ul class="lista-simple">
+            @foreach (var v in Model.ConDocumentacionPendiente)
+            {
+                <li>
+                    <div>
+                        <a class="fuerte" style="text-decoration:none;font-weight:700" asp-controller="Vehiculos" asp-action="Detalle" asp-route-id="@v.Id">@v.Nombre</a>
+                        <div class="mini-sub" style="margin:0">@v.ObservacionDocumentacion</div>
+                    </div>
+                    <partial name="_EstadoBadge" model="v.Estado" />
+                </li>
+            }
+        </ul>
+        @if (!Model.ConDocumentacionPendiente.Any()) { <p class="vacio">Toda la documentación está completa.</p> }
+    </section>
+
+    <section class="tarjeta">
+        <h2>Disponibles actualmente</h2>
+        <p class="tarjeta-sub">Con fotografías finales para las publicaciones.</p>
+        @foreach (var v in Model.Disponibles)
+        {
+            <a class="mini" asp-controller="Vehiculos" asp-action="Detalle" asp-route-id="@v.Id">
+                <div class="mini-titulo">@v.Nombre</div>
+                <div class="mini-sub" style="margin-bottom:0">VIN @v.VinCorto · @v.Color · @v.CantidadFotosFinales fotografía(s) final(es)</div>
+            </a>
+        }
+        @if (!Model.Disponibles.Any()) { <p class="vacio">No hay vehículos disponibles en este momento.</p> }
+    </section>
+</div>

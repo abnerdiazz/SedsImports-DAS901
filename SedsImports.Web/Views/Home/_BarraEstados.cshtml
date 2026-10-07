@@ -1,0 +1,28 @@
+@model ConteoEstadosDto
+@* Barra segmentada y leyenda con la cantidad de vehículos en cada estado. *@
+@{
+    var segmentos = new (EstadoVehiculo Estado, string Clase)[]
+    {
+        (EstadoVehiculo.RecienLlegado, "seg-recien"),
+        (EstadoVehiculo.EnRevision, "seg-revision"),
+        (EstadoVehiculo.RevisionFinalizada, "seg-autorizacion"),
+        (EstadoVehiculo.Disponible, "seg-disponible"),
+        (EstadoVehiculo.Apartado, "seg-apartado"),
+        (EstadoVehiculo.Vendido, "seg-vendido")
+    };
+    var total = Math.Max(Model.Total, 1);
+}
+<div class="barra-estados" role="img" aria-label="Distribución de vehículos por estado">
+    @foreach (var s in segmentos.Where(s => Model.De(s.Estado) > 0))
+    {
+        <span class="@s.Clase" style="width:@((Model.De(s.Estado) * 100.0 / total).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%" title="@s.Estado.NombreVisible(): @Model.De(s.Estado)"></span>
+    }
+</div>
+<div class="leyenda">
+    @foreach (var s in segmentos)
+    {
+        <a asp-controller="Vehiculos" asp-action="Index" asp-route-estado="@s.Estado" style="text-decoration:none">
+            <span class="badge @s.Estado.ClaseCss()">@s.Estado.NombreVisible() · @Model.De(s.Estado)</span>
+        </a>
+    }
+</div>
