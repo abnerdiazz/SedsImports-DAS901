@@ -1,0 +1,29 @@
+@model InicioViewModel
+@{
+    ViewData["Title"] = "Inicio";
+    ViewData["Menu"] = "inicio";
+
+    // Cada perfil tiene su propio panel (vista parcial).
+    var panel = Model.Rol switch
+    {
+        TipoRol.EncargadoPatio => "_InicioPatio",
+        TipoRol.Mecanico => "_InicioMecanico",
+        TipoRol.AsistenteAdministrativa => "_InicioAsistente",
+        _ => "_InicioDueno"
+    };
+}
+
+<div class="encabezado">
+    <div>
+        <h1>Hola, @Model.Usuario.PrimerNombre</h1>
+        <p class="encabezado-sub">@Model.Usuario.Rol.Nombre · @Formato.Fecha(Model.Hoy)</p>
+    </div>
+    @if (Permisos.PuedeRegistrarVehiculo(Model.Rol))
+    {
+        <div class="encabezado-acciones">
+            <a class="btn btn-primario" asp-controller="Vehiculos" asp-action="Create">@Iconos.Svg("registrar") Registrar vehículo</a>
+        </div>
+    }
+</div>
+
+<partial name="@panel" model="Model" />
