@@ -1,0 +1,35 @@
+@model VehiculoFormViewModel
+@inject IUsuarioActualService Sesion
+@{
+    ViewData["Title"] = "Registrar vehículo";
+    ViewData["Menu"] = "registrar";
+    var esDueno = Sesion.Rol == TipoRol.DuenoVendedor;
+}
+
+<div class="encabezado">
+    <div>
+        <h1>Registrar vehículo</h1>
+        <p class="encabezado-sub">@(esDueno ? "El dueño también puede registrar ingresos al patio." : "Completa los datos del ingreso al patio. Los campos con * son obligatorios.")</p>
+    </div>
+</div>
+
+<section class="tarjeta formulario">
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        <partial name="_FormVehiculo" model="Model" />
+
+        <div class="estado-fijo">
+            <span>Estado inicial</span>
+            <partial name="_EstadoBadge" model="EstadoVehiculo.RecienLlegado" />
+            <span class="ayuda" style="margin:0">Se asigna automáticamente.</span>
+        </div>
+
+        <div class="acciones">
+            <a class="btn btn-secundario" asp-controller="Home" asp-action="Index">Cancelar</a>
+            <button type="submit" class="btn btn-primario">Registrar vehículo</button>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
