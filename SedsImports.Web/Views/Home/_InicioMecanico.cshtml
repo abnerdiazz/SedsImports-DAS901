@@ -1,0 +1,65 @@
+@model InicioViewModel
+@* Panel del mecánico: tablero de trabajo en tres columnas y sus últimas anotaciones. *@
+<h2 style="margin-bottom:12px">Vehículos pendientes de trabajar</h2>
+
+<div class="rejilla-3">
+    <section class="columna">
+        <h3>Recién llegados</h3>
+        <p class="tarjeta-sub">Pendientes de iniciar revisión</p>
+        @foreach (var v in Model.RecienLlegados)
+        {
+            <a class="mini" asp-controller="Vehiculos" asp-action="Detalle" asp-route-id="@v.Id">
+                <div class="mini-titulo">@v.Nombre</div>
+                <div class="mini-sub">VIN @v.VinCorto</div>
+                <partial name="_EstadoBadge" model="v.Estado" />
+            </a>
+        }
+        @if (!Model.RecienLlegados.Any()) { <p class="vacio">Nada pendiente.</p> }
+    </section>
+
+    <section class="columna">
+        <h3>En revisión / preparación</h3>
+        <p class="tarjeta-sub">Trabajo en curso</p>
+        @foreach (var v in Model.EnRevision)
+        {
+            <a class="mini" asp-controller="Vehiculos" asp-action="Detalle" asp-route-id="@v.Id">
+                <div class="mini-titulo">@v.Nombre</div>
+                <div class="mini-sub">@v.CantidadNotas anotación(es)</div>
+                <partial name="_EstadoBadge" model="v.Estado" />
+            </a>
+        }
+        @if (!Model.EnRevision.Any()) { <p class="vacio">Sin trabajos en curso.</p> }
+    </section>
+
+    <section class="columna">
+        <h3>Preparación terminada</h3>
+        <p class="tarjeta-sub">Esperando autorización del dueño o ya disponibles</p>
+        @foreach (var v in Model.PreparacionTerminada)
+        {
+            <a class="mini" asp-controller="Vehiculos" asp-action="Detalle" asp-route-id="@v.Id">
+                <div class="mini-titulo">@v.Nombre</div>
+                <div class="mini-sub">@v.CantidadFotosFinales foto(s) final(es)</div>
+                <partial name="_EstadoBadge" model="v.Estado" />
+            </a>
+        }
+        @if (!Model.PreparacionTerminada.Any()) { <p class="vacio">Aún no hay vehículos terminados.</p> }
+    </section>
+</div>
+
+<section class="tarjeta" style="margin-top:16px">
+    <h2>Mis últimas anotaciones</h2>
+    @if (Model.MisNotas.Any())
+    {
+        @foreach (var n in Model.MisNotas)
+        {
+            <div class="nota">
+                <div class="nota-meta">@Formato.FechaHora(n.Fecha) · <a asp-controller="Vehiculos" asp-action="Detalle" asp-route-id="@n.VehiculoId">@n.Vehiculo</a></div>
+                <div class="nota-texto">@n.Texto</div>
+            </div>
+        }
+    }
+    else
+    {
+        <p class="vacio">Todavía no has registrado anotaciones.</p>
+    }
+</section>
