@@ -4,13 +4,12 @@
    ========================================================================= */
 
 /* ---------- 1. Paleta de colores (variables) ---------- */
-/* Paleta provisional: se reemplaza por la paleta oficial del manual de estilos. */
 :root {
     /* Marca */
-    --azul-marino: #1e3a5f;         /* barra lateral, panel del login */
-    --azul-marino-2: #2b4c74;       /* hover en la barra lateral */
-    --amarillo: #f0ad4e;            /* acción principal, menú activo, "Imports" */
-    --amarillo-hover: #ec971f;
+    --azul-marino: #102c42;         /* barra lateral, panel del login */
+    --azul-marino-2: #173a55;       /* hover en la barra lateral */
+    --amarillo: #f5b700;            /* acción principal, menú activo, "Imports" */
+    --amarillo-hover: #e0a700;
 
     /* Superficies */
     --fondo: #f1f4f7;
@@ -34,7 +33,7 @@
     --rojo: #b91c1c;      --rojo-fondo: #fde8e8;
 
     /* Tipografía */
-    --fuente: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+    --fuente: "Barlow", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
     --texto-xs: 0.75rem;   /* 12px etiquetas, fechas */
     --texto-sm: 0.8125rem; /* 13px tablas, ayudas */
     --texto-md: 0.9375rem; /* 15px cuerpo */
