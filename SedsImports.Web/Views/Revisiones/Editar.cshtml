@@ -1,0 +1,83 @@
+@model FinalizarRevisionViewModel
+@{
+    ViewData["Title"] = "Finalizar revisión";
+    ViewData["Menu"] = "vehiculos";
+}
+
+<a class="btn btn-secundario btn-sm btn-volver" asp-controller="Vehiculos" asp-action="Detalle" asp-route-id="@Model.VehiculoId">← Volver a la ficha</a>
+
+<div class="encabezado">
+    <div>
+        <h1>Finalizar revisión</h1>
+        <p class="encabezado-sub">@Model.Vehiculo · VIN @Model.Vin</p>
+    </div>
+    <partial name="_EstadoBadge" model="EstadoVehiculo.EnRevision" />
+</div>
+
+<div class="alerta alerta-teal" style="margin:0 0 16px">
+    <strong>El vehículo no quedará disponible automáticamente</strong>
+    Al finalizar, pasa a <em>Pendiente de autorización</em>. El dueño revisará tus apuntes y decidirá si queda disponible para la venta o si regresa a revisión.
+</div>
+
+<div class="rejilla-2">
+    <section class="tarjeta">
+        <form asp-action="Editar" method="post" enctype="multipart/form-data">
+            <input type="hidden" asp-for="VehiculoId" />
+            <div asp-validation-summary="ModelOnly"></div>
+
+            <div class="grupo">
+                <label class="etiqueta" asp-for="ResumenFinal">Resumen de trabajos realizados <span class="req">*</span></label>
+                <textarea class="campo" asp-for="ResumenFinal" placeholder="Ej.: Cambio de aceite y filtros, bujías nuevas, limpieza de inyectores."></textarea>
+                <span asp-validation-for="ResumenFinal"></span>
+            </div>
+
+            <div class="grupo">
+                <label class="etiqueta" asp-for="Pendientes"></label>
+                <textarea class="campo" asp-for="Pendientes" placeholder="Ej.: Falta cambiar la llanta de repuesto. Si no falta nada, déjalo en blanco."></textarea>
+                <span asp-validation-for="Pendientes"></span>
+                <div class="ayuda">Tus últimos apuntes: lo que todavía le falta arreglar. El dueño lo verá antes de autorizar.</div>
+            </div>
+
+            <div class="grupo">
+                <span class="etiqueta">@Html.DisplayNameFor(m => m.FotosFinalesNuevas)</span>
+                <label class="zona-archivos" data-zona-archivos>
+                    <input type="file" name="FotosFinalesNuevas" multiple accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+                    <strong>Arrastra las fotografías finales o selecciona archivos</strong>
+                    <span class="ayuda">Ya hay @Model.FotosFinales fotografía(s) final(es) cargada(s).</span>
+                </label>
+                <div class="lista-archivos" data-lista-archivos></div>
+                <span asp-validation-for="FotosFinalesNuevas"></span>
+            </div>
+
+            <label class="casilla" style="font-weight:600">
+                <input type="checkbox" asp-for="Confirmacion" />
+                @Html.DisplayNameFor(m => m.Confirmacion)
+            </label>
+            <span asp-validation-for="Confirmacion"></span>
+
+            <div class="acciones">
+                <a class="btn btn-secundario" asp-controller="Vehiculos" asp-action="Detalle" asp-route-id="@Model.VehiculoId">Cancelar</a>
+                <button type="submit" class="btn btn-primario">Finalizar y enviar al dueño</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="tarjeta">
+        <h2>Anotaciones registradas</h2>
+        @foreach (var n in Model.NotasPrevias)
+        {
+            <div class="nota @(n.EsDelSistema ? "nota-sistema" : "")">
+                <div class="nota-meta">@Formato.FechaHora(n.Fecha) · @n.UsuarioNombre</div>
+                <div class="nota-texto">@n.Texto</div>
+            </div>
+        }
+        @if (!Model.NotasPrevias.Any())
+        {
+            <p class="encabezado-sub" style="margin-top:8px">Aún no registraste anotaciones. Puedes describir todo en el resumen.</p>
+        }
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
