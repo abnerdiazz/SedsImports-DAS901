@@ -1,0 +1,39 @@
+@model VehiculoFormViewModel
+@{
+    ViewData["Title"] = "Editar vehículo";
+    ViewData["Menu"] = "vehiculos";
+}
+
+<a class="btn btn-secundario btn-sm btn-volver" asp-action="Detalle" asp-route-id="@Model.Id">← Volver a la ficha</a>
+
+<div class="encabezado">
+    <div>
+        <h1>Editar vehículo</h1>
+        <p class="encabezado-sub">Corrige los datos del registro. El estado del proceso no cambia desde aquí; cada cambio queda en la bitácora.</p>
+    </div>
+</div>
+
+<section class="tarjeta formulario">
+    <form asp-action="Editar" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+        <input type="hidden" asp-for="Id" />
+        <partial name="_FormVehiculo" model="Model" />
+
+        @if (Model.EstadoActual.HasValue)
+        {
+            <div class="estado-fijo">
+                <span>Estado actual</span>
+                <partial name="_EstadoBadge" model="Model.EstadoActual.Value" />
+                <span class="ayuda" style="margin:0">Las fotografías nuevas se agregan como fotos de ingreso.</span>
+            </div>
+        }
+
+        <div class="acciones">
+            <a class="btn btn-secundario" asp-action="Detalle" asp-route-id="@Model.Id">Cancelar</a>
+            <button type="submit" class="btn btn-primario">Guardar cambios</button>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
