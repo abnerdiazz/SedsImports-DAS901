@@ -1,0 +1,22 @@
+@model DocumentacionViewModel
+@{
+    ViewData["Title"] = "Actualizar documentación";
+    ViewData["Menu"] = Model.Origen == "ficha" ? "vehiculos" : "documentacion";
+}
+
+<a class="btn btn-secundario btn-sm btn-volver" href="@(Model.Origen == "ficha" ? Url.Action("Detalle", "Vehiculos", new { id = Model.VehiculoId }) : Url.Action("Index"))">← Volver</a>
+
+<div class="encabezado">
+    <div>
+        <h1>Documentación</h1>
+        <p class="encabezado-sub">@Model.Vehiculo · Estado operativo: @Model.EstadoOperativo.NombreVisible()</p>
+    </div>
+</div>
+
+<section class="tarjeta formulario" style="max-width:560px">
+    <partial name="_FormDocumentacion" model="Model" />
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
