@@ -1,0 +1,48 @@
+@model DocumentacionViewModel
+@* Formulario de documentación. Se usa en el modal del módulo Documentación, en la ficha y en la página Editar. *@
+@{
+    var enModal = ViewData["EnModal"] as bool? == true;
+    var p = (ViewData["Prefijo"] as string) ?? "doc";
+}
+<form asp-controller="Documentacion" asp-action="Editar" method="post">
+    <input type="hidden" asp-for="VehiculoId" id="@p-VehiculoId" />
+    <input type="hidden" asp-for="Origen" id="@p-Origen" />
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <div class="grupo">
+        <span class="etiqueta">Documentos del vehículo</span>
+        <div class="casillas">
+            <label class="casilla"><input type="checkbox" asp-for="TieneTitulo" id="@p-TieneTitulo" /> @Html.DisplayNameFor(m => m.TieneTitulo)</label>
+            <label class="casilla"><input type="checkbox" asp-for="TieneImportacion" id="@p-TieneImportacion" /> @Html.DisplayNameFor(m => m.TieneImportacion)</label>
+            <label class="casilla"><input type="checkbox" asp-for="TieneTarjetaCirculacion" id="@p-TieneTarjetaCirculacion" /> @Html.DisplayNameFor(m => m.TieneTarjetaCirculacion)</label>
+            <label class="casilla"><input type="checkbox" asp-for="TieneTraspaso" id="@p-TieneTraspaso" /> @Html.DisplayNameFor(m => m.TieneTraspaso)</label>
+            <label class="casilla"><input type="checkbox" asp-for="TieneOtros" id="@p-TieneOtros" /> @Html.DisplayNameFor(m => m.TieneOtros)</label>
+        </div>
+        <div class="ayuda">Para marcarla como completa se necesitan los cuatro primeros documentos.</div>
+    </div>
+
+    <div class="grupo">
+        <label class="etiqueta" for="@p-Estado">@Html.DisplayNameFor(m => m.Estado)</label>
+        <select class="campo" asp-for="Estado" id="@p-Estado" asp-items="Html.GetEnumSelectList<EstadoDocumentacion>()"></select>
+        <span asp-validation-for="Estado"></span>
+    </div>
+
+    <div class="grupo">
+        <label class="etiqueta" for="@p-Observaciones">@Html.DisplayNameFor(m => m.Observaciones)</label>
+        <textarea class="campo" asp-for="Observaciones" id="@p-Observaciones" placeholder="Ej.: Pendiente documento original de propiedad."></textarea>
+        <span asp-validation-for="Observaciones"></span>
+        <div class="ayuda">Si queda pendiente, indica qué documento falta.</div>
+    </div>
+
+    <div class="acciones">
+        @if (enModal)
+        {
+            <button type="button" class="btn btn-secundario" data-cerrar-modal>Cancelar</button>
+        }
+        else
+        {
+            <a class="btn btn-secundario" href="@(Model.Origen == "ficha" ? Url.Action("Detalle", "Vehiculos", new { id = Model.VehiculoId }) : Url.Action("Index", "Documentacion"))">Cancelar</a>
+        }
+        <button type="submit" class="btn btn-primario">Guardar documentación</button>
+    </div>
+</form>

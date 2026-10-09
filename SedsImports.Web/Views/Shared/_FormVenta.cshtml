@@ -1,0 +1,61 @@
+@model VentaViewModel
+@* Formulario de venta. Se usa en el modal de la ficha y en la página Crear. *@
+@{
+    var enModal = ViewData["EnModal"] as bool? == true;
+    var p = (ViewData["Prefijo"] as string) ?? "ven";
+}
+<form asp-controller="Ventas" asp-action="Crear" method="post">
+    <input type="hidden" asp-for="VehiculoId" id="@p-VehiculoId" />
+    <input type="hidden" asp-for="Origen" id="@p-Origen" />
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <div class="grupo">
+        <label class="etiqueta" for="@p-FechaVenta">@Html.DisplayNameFor(m => m.FechaVenta) <span class="req">*</span></label>
+        <input class="campo" asp-for="FechaVenta" id="@p-FechaVenta" type="date" max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+        <span asp-validation-for="FechaVenta"></span>
+    </div>
+    <div class="grupo">
+        <label class="etiqueta" for="@p-NombreCliente">@Html.DisplayNameFor(m => m.NombreCliente) <span class="req">*</span></label>
+        <input class="campo" asp-for="NombreCliente" id="@p-NombreCliente" readonly="@(Model.VieneDeApartado ? "readonly" : null)" />
+        <span asp-validation-for="NombreCliente"></span>
+        @if (Model.VieneDeApartado)
+        {
+            <div class="ayuda">Cliente del apartado. Anticipo recibido: @Formato.Dinero(Model.AnticipoPrevio)</div>
+        }
+    </div>
+    @if (!Model.VieneDeApartado)
+    {
+        <div class="grupo">
+            <label class="etiqueta" for="@p-Telefono">@Html.DisplayNameFor(m => m.Telefono)</label>
+            <input class="campo" asp-for="Telefono" id="@p-Telefono" placeholder="7122-9034" inputmode="tel" />
+            <span asp-validation-for="Telefono"></span>
+        </div>
+    }
+    else
+    {
+        <input type="hidden" asp-for="Telefono" id="@p-Telefono" />
+    }
+    <div class="grupo">
+        <label class="etiqueta" for="@p-Vehiculo">Vehículo</label>
+        <input class="campo" id="@p-Vehiculo" value="@Model.Vehiculo" readonly />
+    </div>
+    <div class="grupo">
+        <label class="etiqueta" for="@p-Monto">@Html.DisplayNameFor(m => m.Monto)</label>
+        <input class="campo" asp-for="Monto" id="@p-Monto" type="number" min="1" step="0.01" placeholder="15000" />
+        <span asp-validation-for="Monto"></span>
+    </div>
+
+    <div class="alerta alerta-aviso">Esta acción cambiará el estado del vehículo de @(Model.VieneDeApartado ? "Apartado" : "Disponible") a Vendido.</div>
+
+    <div class="acciones">
+        @if (enModal)
+        {
+            <button type="button" class="btn btn-secundario" data-cerrar-modal>Cancelar</button>
+        }
+        else
+        {
+            <a class="btn btn-secundario" asp-controller="Vehiculos" asp-action="Detalle" asp-route-id="@Model.VehiculoId">Cancelar</a>
+        }
+        <button type="submit" class="btn btn-primario">Confirmar venta</button>
+    </div>
+</form>
