@@ -1,0 +1,15 @@
+@model List<PasoProceso>
+@* Indicador de progreso (stepper) de la ficha del vehículo. *@
+<ol class="pasos" style="list-style:none;padding:0">
+    @foreach (var paso in Model)
+    {
+        var clase = paso.Completado ? "completado" : paso.Actual ? "actual" : "";
+        <li class="paso @clase">
+            <div class="paso-circulo">
+                @if (paso.Completado) { @Iconos.Svg("check") } else { @paso.Numero }
+            </div>
+            <div class="paso-titulo">@paso.Titulo</div>
+            <div class="paso-estado">@(paso.Completado ? "Completado" : paso.Actual ? "Etapa actual" : "")</div>
+        </li>
+    }
+</ol>
