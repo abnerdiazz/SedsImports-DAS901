@@ -301,9 +301,119 @@ a.mini:hover { border-color: var(--borde-fuerte); box-shadow: var(--sombra); }
 .actividad-item { padding: 9px 0; border-bottom: 1px solid #eef1f4; font-size: var(--texto-sm); }
 .actividad-item:last-child { border-bottom: 0; }
 
+/* ---------- 12. Ficha del vehículo ---------- */
+.aviso-rol { background: #e8eef4; border-radius: var(--radio-sm); padding: 10px 14px; font-size: var(--texto-xs); color: var(--texto-suave); margin-bottom: 16px; }
+.pasos { display: flex; align-items: flex-start; margin: 18px 0 10px; }
+.paso { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; min-width: 0; }
+.paso:not(:last-child)::after { content: ""; position: absolute; top: 15px; left: calc(50% + 20px); right: calc(-50% + 20px); height: 3px; background: var(--borde); border-radius: 2px; }
+.paso.completado:not(:last-child)::after { background: var(--azul-marino); }
+.paso-circulo { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: var(--texto-sm); font-weight: 700; background: var(--gris-fondo); color: var(--texto-suave); position: relative; z-index: 1; }
+.paso.completado .paso-circulo { background: var(--azul-marino); color: #fff; }
+.paso.actual .paso-circulo { background: var(--amarillo); color: var(--azul-marino); box-shadow: 0 0 0 4px #fff3c4; }
+.paso-titulo { font-size: var(--texto-xs); font-weight: 600; margin-top: 8px; padding: 0 4px; }
+.paso-estado { font-size: 0.6875rem; color: var(--texto-tenue); }
+.paso.actual .paso-estado { color: #c26a06; }
+.responsable { background: var(--tarjeta-suave); border-radius: var(--radio-sm); text-align: center; padding: 7px 10px; font-size: var(--texto-xs); color: var(--texto-suave); }
+.siguiente { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; background: var(--tarjeta-suave); border-radius: var(--radio-sm); padding: 8px 12px; font-size: var(--texto-xs); color: var(--texto-suave); margin-top: 10px; }
+.siguiente strong { color: var(--texto); font-size: var(--texto-sm); }
+.subtitulo-proceso { font-size: var(--texto-sm); font-weight: 700; margin-top: 4px; }
+.subtitulo-proceso + .tarjeta-sub { margin-bottom: 0; }
+
+.alerta { border-radius: var(--radio-sm); padding: 12px 14px; font-size: var(--texto-sm); margin-top: 12px; }
+.alerta strong { display: block; margin-bottom: 2px; }
+.alerta-exito { background: var(--verde-fondo); color: #14532d; border-left: 4px solid var(--verde); }
+.alerta-info { background: var(--azul-fondo); color: #1e3a8a; border-left: 4px solid var(--azul); }
+.alerta-morado { background: var(--morado-fondo); color: #4c1d95; border-left: 4px solid var(--morado); }
+.alerta-aviso { background: #fff6e0; color: #7c4a03; border-left: 4px solid var(--amarillo); }
+.alerta-teal { background: var(--teal-fondo); color: #134e4a; border-left: 4px solid var(--teal); }
+
+.datos dt { font-size: var(--texto-xs); color: var(--texto-tenue); margin-top: 10px; }
+.datos dt:first-child { margin-top: 0; }
+.datos dd { margin: 2px 0 0; font-size: var(--texto-sm); font-weight: 600; word-break: break-word; }
+
+.nota { padding: 10px 0; border-bottom: 1px solid #eef1f4; }
+.nota:last-child { border-bottom: 0; }
+.nota-meta { font-size: var(--texto-xs); color: var(--texto-tenue); }
+.nota-texto { font-size: var(--texto-sm); margin-top: 3px; }
+.nota-sistema .nota-texto { color: var(--texto-suave); font-style: italic; }
+
+.fotos-grupo + .fotos-grupo { margin-top: 16px; }
+.fotos-grupo h4 { font-size: var(--texto-sm); margin-bottom: 8px; }
+.fotos { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+.foto figure, .foto { margin: 0; }
+.foto-img { aspect-ratio: 4 / 3; border-radius: var(--radio-sm); overflow: hidden; display: grid; place-items: center; color: #fff; }
+.foto-img img { width: 100%; height: 100%; object-fit: cover; }
+.foto-img .icono { width: 42px; height: 42px; opacity: .95; }
+.foto figcaption { font-size: 0.6875rem; color: var(--texto-tenue); margin-top: 4px; }
+.tono-0 { background: #a8c4d8; } .tono-1 { background: #c9b4dc; } .tono-2 { background: #f1d3a8; }
+.tono-3 { background: #b7dcc4; } .tono-4 { background: #d8a9a9; }
+
+.form-en-linea { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+.form-en-linea .campo { flex: 1 1 220px; }
+.desplegable summary { cursor: pointer; list-style: none; display: inline-flex; }
+.desplegable summary::-webkit-details-marker { display: none; }
+.desplegable[open] summary { margin-bottom: 10px; }
+
+/* Tarjetas de vehículos disponibles */
+.tarjetas-vehiculos { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.tarjeta-vehiculo { background: #fff; border: 1px solid var(--borde); border-radius: var(--radio); padding: 12px; box-shadow: var(--sombra); }
+.tarjeta-vehiculo .foto-img { aspect-ratio: 16 / 10; margin-bottom: 12px; }
+.tarjeta-vehiculo .foto-img .icono { width: 64px; height: 64px; }
+.tarjeta-vehiculo-titulo { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- 13. Línea de tiempo (trazabilidad) ---------- */
+.linea-tiempo { list-style: none; margin: 0; padding: 0; position: relative; }
+.linea-tiempo::before { content: ""; position: absolute; left: 5px; top: 8px; bottom: 8px; width: 2px; background: var(--borde); }
+.linea-tiempo li { position: relative; padding: 0 0 18px 26px; }
+.linea-tiempo li:last-child { padding-bottom: 0; }
+.punto { position: absolute; left: 0; top: 4px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--borde); }
+.punto-azul { background: var(--azul); } .punto-verde { background: #16a34a; } .punto-naranja { background: #d97706; }
+.punto-amarillo { background: var(--amarillo); } .punto-morado { background: #8b5cf6; } .punto-gris { background: #6b7280; }
+.tiempo-fecha { font-size: var(--texto-xs); color: var(--texto-tenue); }
+.tiempo-quien { font-size: var(--texto-sm); font-weight: 700; }
+.tiempo-que { font-size: var(--texto-sm); color: var(--texto-suave); }
+
+/* ---------- 14. Gráfica de barras (reportes) ---------- */
+.grafica { display: flex; align-items: flex-end; gap: 14px; height: 200px; padding: 10px 4px 0; border-bottom: 1px solid var(--borde); overflow-x: auto; }
+.barra { flex: 1 0 34px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; text-decoration: none; color: inherit; }
+.barra-relleno { width: 100%; max-width: 46px; background: #1b4a6b; border-radius: 3px 3px 0 0; min-height: 2px; transition: background .15s; }
+.barra:hover .barra-relleno, .barra.activa .barra-relleno { background: var(--amarillo); }
+.barra-valor { font-size: var(--texto-xs); font-weight: 700; margin-bottom: 4px; }
+.grafica-meses { display: flex; gap: 14px; padding: 6px 4px 0; overflow-x: auto; }
+.grafica-meses span { flex: 1 0 34px; text-align: center; font-size: var(--texto-xs); color: var(--texto-suave); }
+.resumen-reporte { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 14px; font-size: var(--texto-sm); color: var(--texto-suave); }
+.resumen-reporte strong { color: var(--texto); font-size: var(--texto-lg); display: block; }
+
 /* ---------- 15. Mensajes (parcial _Mensajes) ---------- */
 .mensaje { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; border-radius: var(--radio-sm); padding: 12px 16px; margin-bottom: 16px; font-size: var(--texto-sm); }
 .mensaje-exito { background: var(--verde-fondo); color: #14532d; border: 1px solid #b7e4c7; }
 .mensaje-error { background: var(--rojo-fondo); color: #7f1d1d; border: 1px solid #f5c2c2; }
 .mensaje button { background: none; border: 0; color: inherit; font-size: 1.1rem; cursor: pointer; line-height: 1; }
+
+/* ---------- 16. Modales (<dialog>) ---------- */
+.modal { border: 0; border-radius: 10px; padding: 0; width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 40px); box-shadow: var(--sombra-modal); color: var(--texto); }
+.modal::backdrop { background: rgba(16, 29, 43, .55); }
+.modal-cuerpo { padding: 22px 24px; }
+.modal-cuerpo h2 { margin-bottom: 2px; }
+.modal-sub { color: var(--texto-suave); font-size: var(--texto-xs); margin-bottom: 16px; }
+
+/* ---------- 17. Inicio de sesión ---------- */
+.login { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; }
+.login-marca { background: var(--azul-marino); color: #fff; display: flex; flex-direction: column; justify-content: center; padding: 48px 8vw; }
+.login-marca .marca-nombre { font-size: 1.75rem; margin-bottom: 16px; }
+.login-lema { font-size: 1.75rem; font-weight: 700; line-height: 1.25; max-width: 440px; }
+.login-texto { color: #b8c6d3; font-size: var(--texto-sm); margin-top: 14px; max-width: 460px; }
+.login-panel { background: #fff; display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
+.login-form { width: 100%; max-width: 360px; }
+.login-form h1 { font-size: 1.5rem; }
+.credenciales { margin-top: 26px; font-size: var(--texto-xs); color: var(--texto-suave); }
+.credenciales summary { cursor: pointer; font-weight: 600; }
+.credenciales table { width: 100%; margin-top: 8px; border-collapse: collapse; }
+.credenciales td { padding: 4px 0; border-bottom: 1px solid #eef1f4; }
+.credenciales button { font-size: var(--texto-xs); }
+
+/* ---------- 18. Confirmación ---------- */
+.confirmacion { max-width: 520px; text-align: center; padding: 30px 24px; }
+.confirmacion-icono { width: 58px; height: 58px; border-radius: 50%; background: var(--verde-fondo); color: var(--verde); display: grid; place-items: center; margin: 0 auto 14px; }
+.confirmacion-icono .icono { width: 30px; height: 30px; }
 
