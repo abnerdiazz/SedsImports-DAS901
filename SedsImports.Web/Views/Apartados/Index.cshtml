@@ -1,0 +1,50 @@
+@model ApartadosIndexViewModel
+@{
+    ViewData["Title"] = "Apartados";
+    ViewData["Menu"] = "apartados";
+}
+
+<div class="encabezado">
+    <div>
+        <h1>Apartados</h1>
+        <p class="encabezado-sub">Vehículos reservados con anticipo. No deben ofrecerse a otros clientes.</p>
+    </div>
+</div>
+
+<section class="tarjeta tarjeta-sin-padding">
+    <div class="tabla-contenedor">
+        <table class="tabla tabla-responsive">
+            <thead>
+                <tr>
+                    <th>Vehículo</th>
+                    <th>Cliente</th>
+                    <th>Contacto</th>
+                    <th>Anticipo</th>
+                    <th>Fecha</th>
+                    <th>Documentación</th>
+                    <th class="derecha">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in Model.Apartados)
+                {
+                    <tr>
+                        <td class="fuerte" data-label="Vehículo">@a.Vehiculo</td>
+                        <td data-label="Cliente">@a.Cliente</td>
+                        <td data-label="Contacto">@a.Contacto</td>
+                        <td data-label="Anticipo">@Formato.Dinero(a.Anticipo)</td>
+                        <td data-label="Fecha">@Formato.Fecha(a.Fecha)</td>
+                        <td data-label="Documentación"><partial name="_EstadoBadge" model="a.EstadoDocumentacion" /></td>
+                        <td class="derecha" data-label="Acción">
+                            <a class="btn-enlace" asp-controller="Vehiculos" asp-action="Detalle" asp-route-id="@a.VehiculoId" asp-route-origen="apartados">Ver ficha</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @if (!Model.Apartados.Any())
+    {
+        <p class="vacio">No hay apartados activos.</p>
+    }
+</section>
