@@ -1,0 +1,22 @@
+@model VentaViewModel
+@{
+    ViewData["Title"] = "Registrar venta";
+    ViewData["Menu"] = "ventas";
+}
+
+<a class="btn btn-secundario btn-sm btn-volver" asp-controller="Vehiculos" asp-action="Detalle" asp-route-id="@Model.VehiculoId">← Volver a la ficha</a>
+
+<div class="encabezado">
+    <div>
+        <h1>Registrar venta</h1>
+        <p class="encabezado-sub">Confirma los datos antes de continuar.</p>
+    </div>
+</div>
+
+<section class="tarjeta formulario" style="max-width:560px">
+    <partial name="_FormVenta" model="Model" />
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

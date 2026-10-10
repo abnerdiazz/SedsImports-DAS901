@@ -1,0 +1,53 @@
+@model List<VentaDetalleDto>
+@{
+    ViewData["Title"] = "Ventas";
+    ViewData["Menu"] = "ventas";
+}
+
+<div class="encabezado">
+    <div>
+        <h1>Ventas</h1>
+        <p class="encabezado-sub">Registro de vehículos vendidos.</p>
+    </div>
+    <div class="encabezado-acciones">
+        <a class="btn btn-secundario" asp-action="Reporte">@Iconos.Svg("reportes") Ver reporte</a>
+    </div>
+</div>
+
+<section class="tarjeta tarjeta-sin-padding">
+    <div class="tabla-contenedor">
+        <table class="tabla tabla-responsive">
+            <thead>
+                <tr>
+                    <th>Vehículo</th>
+                    <th>Cliente</th>
+                    <th>Fecha de venta</th>
+                    <th>Monto</th>
+                    <th>Estado</th>
+                    <th class="derecha">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var venta in Model)
+                {
+                    <tr>
+                        <td class="fuerte" data-label="Vehículo">
+                            <a style="color:inherit;text-decoration:none" asp-controller="Vehiculos" asp-action="Detalle" asp-route-id="@venta.VehiculoId" asp-route-origen="ventas">@venta.Vehiculo</a>
+                        </td>
+                        <td data-label="Cliente">@venta.Cliente</td>
+                        <td data-label="Fecha de venta">@Formato.Fecha(venta.Fecha)</td>
+                        <td data-label="Monto">@Formato.Dinero(venta.Monto)</td>
+                        <td data-label="Estado"><partial name="_EstadoBadge" model="EstadoVehiculo.Vendido" /></td>
+                        <td class="derecha" data-label="Acción">
+                            <a class="btn-enlace" asp-controller="Bitacora" asp-action="Trazabilidad" asp-route-id="@venta.VehiculoId" asp-route-origen="ventas">Ver trazabilidad</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @if (!Model.Any())
+    {
+        <p class="vacio">Todavía no hay ventas registradas.</p>
+    }
+</section>
