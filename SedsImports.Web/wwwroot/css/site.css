@@ -417,3 +417,44 @@ a.mini:hover { border-color: var(--borde-fuerte); box-shadow: var(--sombra); }
 .confirmacion-icono { width: 58px; height: 58px; border-radius: 50%; background: var(--verde-fondo); color: var(--verde); display: grid; place-items: center; margin: 0 auto 14px; }
 .confirmacion-icono .icono { width: 30px; height: 30px; }
 
+/* ---------- 19. Diseño responsive ---------- */
+@media (max-width: 1100px) {
+    .ficha { grid-template-columns: minmax(0, 1fr); }
+    .rejilla-2 { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 900px) {
+    .menu-lateral { transform: translateX(-100%); }
+    body.menu-abierto .menu-lateral { transform: none; }
+    body.menu-abierto .velo { display: block; position: fixed; inset: 0; background: rgba(16,29,43,.45); z-index: 25; }
+    .contenido { margin-left: 0; padding: 0 16px 40px; }
+    .barra-movil {
+        display: flex; align-items: center; gap: 12px;
+        position: sticky; top: 0; z-index: 20;
+        background: var(--azul-marino); color: #fff;
+        margin: 0 -16px 18px; padding: 12px 16px;
+    }
+    .barra-movil button { background: none; border: 0; color: #fff; cursor: pointer; padding: 4px; display: grid; }
+    .barra-movil .icono { width: 24px; height: 24px; }
+    .barra-movil .marca-nombre { font-size: 1.05rem; }
+    .rejilla-3, .rejilla-mitad { grid-template-columns: minmax(0, 1fr); }
+    .login { grid-template-columns: 1fr; }
+    .login-marca { padding: 36px 24px; }
+    .login-lema { font-size: 1.35rem; }
+}
+
+@media (max-width: 600px) {
+    h1 { font-size: 1.35rem; }
+    .fila-campos { grid-template-columns: 1fr; }
+    .kpis { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .kpi-valor { font-size: 1.6rem; }
+    .tarjeta { padding: 16px; }
+    .pasos { overflow-x: auto; padding-bottom: 4px; }
+    .paso { min-width: 76px; }
+    .busqueda { max-width: none; }
+    .tabla-responsive thead { display: none; }
+    .tabla-responsive tr { display: block; border-bottom: 1px solid var(--borde); padding: 8px 0; }
+    .tabla-responsive td { display: flex; justify-content: space-between; gap: 12px; border: 0; padding: 5px 14px; text-align: right; }
+    .tabla-responsive td::before { content: attr(data-label); color: var(--texto-tenue); font-size: var(--texto-xs); text-align: left; }
+    .tabla-responsive td.derecha { justify-content: flex-end; }
+}
