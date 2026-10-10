@@ -1,0 +1,28 @@
+@model DatosClienteParcial
+@* Datos del cliente de un apartado o una venta (se reutiliza en la ficha y en el registro de venta). *@
+<dl class="datos">
+    <dt>Cliente</dt>
+    <dd>@Model.Cliente.Nombre</dd>
+    <dt>Contacto</dt>
+    <dd>@(string.IsNullOrWhiteSpace(Model.Cliente.Telefono) ? "—" : Model.Cliente.Telefono)</dd>
+    @if (Model.Anticipo.HasValue)
+    {
+        <dt>Anticipo</dt>
+        <dd>@Formato.Dinero(Model.Anticipo)</dd>
+    }
+    @if (Model.Monto.HasValue)
+    {
+        <dt>Monto de venta</dt>
+        <dd>@Formato.Dinero(Model.Monto)</dd>
+    }
+    @if (Model.Fecha.HasValue)
+    {
+        <dt>@Model.EtiquetaFecha</dt>
+        <dd>@Formato.Fecha(Model.Fecha.Value)</dd>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.Observaciones))
+    {
+        <dt>Observaciones</dt>
+        <dd>@Model.Observaciones</dd>
+    }
+</dl>

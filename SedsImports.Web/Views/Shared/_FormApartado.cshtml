@@ -1,0 +1,46 @@
+@model ApartadoViewModel
+@* Formulario de apartado. Se usa en el modal de Disponibles, en la ficha y en la página Crear. *@
+@{
+    var enModal = ViewData["EnModal"] as bool? == true;
+    var p = (ViewData["Prefijo"] as string) ?? "apa";
+}
+<form asp-controller="Apartados" asp-action="Crear" method="post">
+    <input type="hidden" asp-for="VehiculoId" id="@p-VehiculoId" />
+    <input type="hidden" asp-for="Origen" id="@p-Origen" />
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <div class="grupo">
+        <label class="etiqueta" for="@p-NombreCliente">@Html.DisplayNameFor(m => m.NombreCliente) <span class="req">*</span></label>
+        <input class="campo" asp-for="NombreCliente" id="@p-NombreCliente" autocomplete="off" />
+        <span asp-validation-for="NombreCliente"></span>
+    </div>
+    <div class="grupo">
+        <label class="etiqueta" for="@p-Telefono">@Html.DisplayNameFor(m => m.Telefono) <span class="req">*</span></label>
+        <input class="campo" asp-for="Telefono" id="@p-Telefono" placeholder="7122-9034" inputmode="tel" />
+        <span asp-validation-for="Telefono"></span>
+    </div>
+    <div class="grupo">
+        <label class="etiqueta" for="@p-Anticipo">@Html.DisplayNameFor(m => m.Anticipo) <span class="req">*</span></label>
+        <input class="campo" asp-for="Anticipo" id="@p-Anticipo" type="number" min="1" step="0.01" placeholder="2000" />
+        <span asp-validation-for="Anticipo"></span>
+    </div>
+    <div class="grupo">
+        <label class="etiqueta" for="@p-Observaciones">@Html.DisplayNameFor(m => m.Observaciones)</label>
+        <textarea class="campo" asp-for="Observaciones" id="@p-Observaciones"></textarea>
+        <span asp-validation-for="Observaciones"></span>
+    </div>
+
+    <div class="alerta alerta-aviso">Al registrar el apartado, el vehículo dejará de aparecer como disponible para venta.</div>
+
+    <div class="acciones">
+        @if (enModal)
+        {
+            <button type="button" class="btn btn-secundario" data-cerrar-modal>Cancelar</button>
+        }
+        else
+        {
+            <a class="btn btn-secundario" asp-controller="Apartados" asp-action="Disponibles">Cancelar</a>
+        }
+        <button type="submit" class="btn btn-primario">Registrar apartado</button>
+    </div>
+</form>

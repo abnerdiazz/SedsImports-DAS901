@@ -1,0 +1,11 @@
+@model Enum
+@* Insignia de color reutilizable para el estado del vehículo o de la documentación. *@
+@{
+    var clase = Model switch
+    {
+        EstadoVehiculo e => e.ClaseCss(),
+        EstadoDocumentacion d => d.ClaseCss(),
+        _ => "badge-neutro"
+    };
+}
+<span class="badge @clase">@Model.NombreVisible()</span>

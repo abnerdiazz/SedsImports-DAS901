@@ -1,0 +1,102 @@
+@inject IUsuarioActualService Sesion
+@{
+    var usuario = Sesion.Usuario;
+    var sinMenu = ViewData["SinMenu"] as bool? == true || usuario == null;
+    var menuActivo = ViewData["Menu"] as string ?? string.Empty;
+    var titulo = ViewData["Title"] as string;
+
+    // Menú por perfil: cada rol ve solo los módulos que le corresponden.
+    var opciones = new List<(string Clave, string Texto, string Icono, string Controlador, string Accion)>
+    {
+        ("inicio", "Inicio", "inicio", "Home", "Index"),
+        ("vehiculos", "Vehículos", "vehiculos", "Vehiculos", "Index")
+    };
+    if (usuario != null)
+    {
+        var rol = usuario.Rol.Tipo;
+        if (Permisos.PuedeRegistrarVehiculo(rol)) opciones.Add(("registrar", "Registrar vehículo", "registrar", "Vehiculos", "Create"));
+        if (rol == TipoRol.AsistenteAdministrativa) opciones.Add(("documentacion", "Documentación", "documento", "Documentacion", "Index"));
+        if (rol == TipoRol.DuenoVendedor)
+        {
+            opciones.Add(("disponibles", "Disponibles", "disponibles", "Apartados", "Disponibles"));
+            opciones.Add(("apartados", "Apartados", "documento", "Apartados", "Index"));
+            opciones.Add(("ventas", "Ventas", "documento", "Ventas", "Index"));
+            opciones.Add(("reportes", "Reportes", "reportes", "Ventas", "Reporte"));
+            opciones.Add(("bitacora", "Bitácora", "bitacora", "Bitacora", "Index"));
+            opciones.Add(("usuarios", "Usuarios", "usuarios", "Usuarios", "Index"));
+        }
+    }
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(string.IsNullOrEmpty(titulo) ? "" : titulo + " · ")SED's Imports</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Estilos", required: false)
+</head>
+<body>
+    @if (sinMenu)
+    {
+        @RenderBody()
+    }
+    else
+    {
+        <div class="app">
+            <aside class="menu-lateral" aria-label="Menú principal">
+                <div class="marca">
+                    <div class="marca-nombre">SED's <span>Imports</span></div>
+                    <div class="marca-sub">Gestión y seguimiento vehicular</div>
+                </div>
+
+                <nav>
+                    <ul class="menu">
+                        @foreach (var op in opciones)
+                        {
+                            <li>
+                                <a asp-controller="@op.Controlador" asp-action="@op.Accion"
+                                   class="@(menuActivo == op.Clave ? "activo" : null)"
+                                   aria-current="@(menuActivo == op.Clave ? "page" : null)">
+                                    @Iconos.Svg(op.Icono)
+                                    <span>@op.Texto</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+
+                <div class="menu-pie">
+                    <div class="usuario">
+                        <div class="avatar">@usuario!.Iniciales</div>
+                        <div>
+                            <div class="usuario-nombre">@usuario.NombreCompleto</div>
+                            <div class="usuario-rol">@usuario.Rol.Nombre</div>
+                        </div>
+                    </div>
+                    <form asp-controller="Acceso" asp-action="Salir" method="post">
+                        <button type="submit" class="boton-salir">@Iconos.Svg("salir") Cerrar sesión</button>
+                    </form>
+                </div>
+            </aside>
+            <div class="velo" data-cerrar-menu></div>
+
+            <main class="contenido">
+                <div class="barra-movil">
+                    <button type="button" data-abrir-menu aria-label="Abrir menú">@Iconos.Svg("menu")</button>
+                    <div class="marca-nombre">SED's <span style="color:var(--amarillo)">Imports</span></div>
+                </div>
+
+                <partial name="_Mensajes" />
+                @RenderBody()
+            </main>
+        </div>
+    }
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

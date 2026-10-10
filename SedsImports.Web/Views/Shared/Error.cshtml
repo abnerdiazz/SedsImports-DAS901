@@ -1,0 +1,18 @@
+@{
+    var codigo = ViewData["Codigo"] as int? ?? 500;
+    ViewData["Title"] = "Error";
+    var (titulo, texto) = codigo switch
+    {
+        404 => ("Página no encontrada", "La página o el vehículo que buscas no existe o fue eliminado."),
+        403 => ("Acceso no permitido", "Tu perfil no tiene permiso para ver esta página."),
+        _ => ("Ocurrió un error", "Algo salió mal al procesar tu solicitud. Intenta de nuevo.")
+    };
+}
+<div class="tarjeta confirmacion" style="margin: 40px auto;">
+    <div class="confirmacion-icono" style="background:var(--rojo-fondo);color:var(--rojo)">@Iconos.Svg("alerta")</div>
+    <h1 style="font-size:1.4rem">@titulo</h1>
+    <p class="encabezado-sub" style="margin-top:8px">Código @codigo · @texto</p>
+    <div class="acciones" style="justify-content:center">
+        <a class="btn btn-primario" asp-controller="Home" asp-action="Index">Ir al inicio</a>
+    </div>
+</div>

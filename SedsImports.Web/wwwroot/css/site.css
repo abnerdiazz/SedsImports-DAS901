@@ -1,0 +1,460 @@
+/* =========================================================================
+   SED's Imports & Services — Hoja de estilos del sistema
+   Manual de estilos: paleta, tipografía, componentes y diseño responsive.
+   ========================================================================= */
+
+/* ---------- 1. Paleta de colores (variables) ---------- */
+:root {
+    /* Marca */
+    --azul-marino: #102c42;         /* barra lateral, panel del login */
+    --azul-marino-2: #173a55;       /* hover en la barra lateral */
+    --amarillo: #f5b700;            /* acción principal, menú activo, "Imports" */
+    --amarillo-hover: #e0a700;
+
+    /* Superficies */
+    --fondo: #f1f4f7;
+    --tarjeta: #ffffff;
+    --tarjeta-suave: #f6f8fa;
+    --borde: #e2e7ed;
+    --borde-fuerte: #cfd6de;
+
+    /* Texto */
+    --texto: #0f1d2b;
+    --texto-suave: #5f6b7a;
+    --texto-tenue: #8a95a3;
+
+    /* Estados del vehículo */
+    --azul: #2563eb;      --azul-fondo: #e6efff;
+    --naranja: #b45309;   --naranja-fondo: #fff1db;
+    --teal: #0f766e;      --teal-fondo: #dcf5f1;
+    --verde: #15803d;     --verde-fondo: #e2f6e9;
+    --morado: #7c3aed;    --morado-fondo: #efe8ff;
+    --gris: #4b5563;      --gris-fondo: #eceff3;
+    --rojo: #b91c1c;      --rojo-fondo: #fde8e8;
+
+    /* Tipografía */
+    --fuente: "Barlow", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+    --texto-xs: 0.75rem;   /* 12px etiquetas, fechas */
+    --texto-sm: 0.8125rem; /* 13px tablas, ayudas */
+    --texto-md: 0.9375rem; /* 15px cuerpo */
+    --texto-lg: 1.125rem;  /* 18px títulos de tarjeta */
+    --texto-xl: 1.625rem;  /* 26px títulos de página */
+    --texto-kpi: 2rem;     /* 32px indicadores */
+
+    /* Espaciado y forma */
+    --radio: 8px;
+    --radio-sm: 6px;
+    --sombra: 0 1px 2px rgba(16, 44, 66, .06);
+    --sombra-modal: 0 20px 50px rgba(16, 44, 66, .25);
+    --ancho-menu: 240px;
+}
+
+/* ---------- 2. Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+
+body {
+    margin: 0;
+    font-family: var(--fuente);
+    font-size: var(--texto-md);
+    color: var(--texto);
+    background: var(--fondo);
+    line-height: 1.45;
+}
+
+h1, h2, h3, h4 { margin: 0; line-height: 1.2; font-weight: 700; }
+h1 { font-size: var(--texto-xl); }
+h2 { font-size: var(--texto-lg); }
+h3 { font-size: 1rem; }
+p { margin: 0; }
+a { color: var(--azul-marino); }
+img { max-width: 100%; display: block; }
+
+.icono { width: 18px; height: 18px; flex-shrink: 0; }
+
+.sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;
+}
+
+/* ---------- 3. Estructura (layout) ---------- */
+.app { display: flex; min-height: 100vh; }
+
+.menu-lateral {
+    width: var(--ancho-menu);
+    background: var(--azul-marino);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 30;
+    transition: transform .2s ease;
+}
+
+.marca { padding: 22px 20px 18px; }
+.marca-nombre { font-size: 1.25rem; font-weight: 800; letter-spacing: -.01em; }
+.marca-nombre span { color: var(--amarillo); }
+.marca-sub { font-size: var(--texto-xs); color: #a9b8c6; margin-top: 2px; }
+
+.menu-lateral nav { flex: 1; overflow-y: auto; }
+.menu { list-style: none; margin: 4px 0 0; padding: 0 12px; }
+.menu a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; margin-bottom: 4px;
+    color: #d6e0e9; text-decoration: none;
+    border-radius: var(--radio-sm);
+    font-size: var(--texto-sm); font-weight: 500;
+}
+.menu a:hover { background: var(--azul-marino-2); color: #fff; }
+.menu a.activo { background: var(--amarillo); color: var(--azul-marino); font-weight: 700; }
+
+.menu-pie { border-top: 1px solid rgba(255,255,255,.1); padding: 16px 16px 18px; }
+.usuario { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: #1f4a6b; color: var(--amarillo);
+    display: grid; place-items: center;
+    font-size: var(--texto-xs); font-weight: 700; flex-shrink: 0;
+}
+.usuario-nombre { font-size: var(--texto-sm); font-weight: 700; }
+.usuario-rol { font-size: var(--texto-xs); color: #a9b8c6; }
+.boton-salir {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    background: none; border: 0; color: #d6e0e9; cursor: pointer;
+    font: inherit; font-size: var(--texto-sm); padding: 6px 2px;
+}
+.boton-salir:hover { color: #fff; }
+
+.contenido {
+    flex: 1;
+    margin-left: var(--ancho-menu);
+    padding: 28px 32px 48px;
+    min-width: 0;
+}
+
+.barra-movil { display: none; }
+.velo { display: none; }
+
+/* ---------- 4. Encabezados de página ---------- */
+.encabezado { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
+.encabezado-sub { color: var(--texto-suave); font-size: var(--texto-sm); margin-top: 4px; }
+.encabezado-acciones { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.titulo-seccion { margin: 26px 0 12px; }
+
+/* ---------- 5. Tarjetas ---------- */
+.tarjeta {
+    background: var(--tarjeta);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra);
+    padding: 20px;
+}
+.tarjeta + .tarjeta { margin-top: 16px; }
+.tarjeta-titulo { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 4px; flex-wrap: wrap; }
+.tarjeta-sub { color: var(--texto-suave); font-size: var(--texto-xs); margin-bottom: 14px; }
+.tarjeta-seccion { border-top: 1px solid var(--borde); margin-top: 18px; padding-top: 16px; }
+.tarjeta-sin-padding { padding: 0; overflow: hidden; }
+
+/* Indicadores (KPI) */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 16px; }
+.kpi { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio); padding: 16px 18px; box-shadow: var(--sombra); text-decoration: none; color: inherit; display: block; }
+a.kpi:hover { border-color: var(--borde-fuerte); }
+.kpi-valor { font-size: var(--texto-kpi); font-weight: 700; line-height: 1; }
+.kpi-etiqueta { color: var(--texto-suave); font-size: var(--texto-sm); margin-top: 8px; }
+.c-azul { color: var(--azul); } .c-naranja { color: #c26a06; } .c-verde { color: var(--verde); }
+.c-morado { color: var(--morado); } .c-gris { color: var(--gris); } .c-teal { color: var(--teal); }
+
+/* Rejillas */
+.rejilla-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; align-items: start; }
+.rejilla-mitad { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+.rejilla-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: start; }
+.ficha { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+.ficha .tarjeta + .tarjeta { margin-top: 16px; }
+
+/* ---------- 6. Botones ---------- */
+.btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    font: inherit; font-size: var(--texto-sm); font-weight: 600;
+    padding: 9px 16px; border-radius: var(--radio-sm);
+    border: 1px solid transparent; cursor: pointer; text-decoration: none;
+    line-height: 1.2; white-space: nowrap;
+}
+.btn:focus-visible, .campo:focus-visible, .chip:focus-visible { outline: 3px solid rgba(245,183,0,.45); outline-offset: 1px; }
+.btn-primario { background: var(--amarillo); color: var(--azul-marino); }
+.btn-primario:hover { background: var(--amarillo-hover); }
+.btn-oscuro { background: var(--azul-marino); color: #fff; }
+.btn-oscuro:hover { background: var(--azul-marino-2); }
+.btn-secundario { background: #fff; color: var(--texto); border-color: var(--borde-fuerte); }
+.btn-secundario:hover { background: var(--tarjeta-suave); }
+.btn-peligro { background: #fff; color: var(--rojo); border-color: #f2b8b8; }
+.btn-peligro:hover { background: var(--rojo-fondo); }
+.btn-exito { background: var(--verde); color: #fff; }
+.btn-exito:hover { background: #126c33; }
+.btn-sm { padding: 6px 12px; font-size: var(--texto-xs); }
+.btn-bloque { width: 100%; }
+.btn-enlace { background: none; border: 0; padding: 0; color: var(--azul-marino); font: inherit; font-size: var(--texto-sm); font-weight: 600; cursor: pointer; text-decoration: none; }
+.btn-enlace:hover { text-decoration: underline; }
+.btn-volver { margin-bottom: 14px; }
+.acciones { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
+
+/* ---------- 7. Insignias de estado ---------- */
+.badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 10px; border-radius: 999px;
+    font-size: var(--texto-xs); font-weight: 600; white-space: nowrap;
+}
+.badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.badge-recien { background: var(--azul-fondo); color: var(--azul); }
+.badge-revision { background: var(--naranja-fondo); color: var(--naranja); }
+.badge-autorizacion { background: var(--teal-fondo); color: var(--teal); }
+.badge-disponible { background: var(--verde-fondo); color: var(--verde); }
+.badge-apartado { background: var(--morado-fondo); color: var(--morado); }
+.badge-vendido, .badge-neutro { background: var(--gris-fondo); color: var(--gris); }
+.badge-inactivo { background: var(--rojo-fondo); color: var(--rojo); }
+.etiqueta-mia { background: var(--amarillo); color: var(--azul-marino); }
+
+/* Barra segmentada de vehículos por estado */
+.barra-estados { display: flex; height: 12px; border-radius: 999px; overflow: hidden; background: var(--gris-fondo); margin: 10px 0 12px; }
+.barra-estados span { display: block; height: 100%; }
+.seg-recien { background: var(--azul); } .seg-revision { background: #d97706; } .seg-autorizacion { background: var(--teal); }
+.seg-disponible { background: #16a34a; } .seg-apartado { background: #8b5cf6; } .seg-vendido { background: #6b7280; }
+.leyenda { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ---------- 8. Formularios ---------- */
+.formulario { max-width: 760px; }
+.fila-campos { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; }
+.grupo { margin-bottom: 8px; }
+.etiqueta { display: block; font-size: var(--texto-sm); font-weight: 600; margin-bottom: 6px; }
+.etiqueta .req { color: var(--rojo); }
+.campo {
+    width: 100%; font: inherit; font-size: var(--texto-sm); color: var(--texto);
+    padding: 10px 12px; background: #fff;
+    border: 1px solid var(--borde-fuerte); border-radius: var(--radio-sm);
+}
+.campo:focus { border-color: var(--amarillo); }
+textarea.campo { min-height: 84px; resize: vertical; }
+.campo[readonly] { background: var(--tarjeta-suave); color: var(--texto-suave); }
+.ayuda { font-size: var(--texto-xs); color: var(--texto-tenue); margin-top: 4px; }
+.field-validation-error, .text-danger { color: var(--rojo); font-size: var(--texto-xs); display: block; margin-top: 4px; }
+/* Espacio reservado para el mensaje de validación: evita que el formulario "salte" al corregir un campo. */
+.grupo span[data-valmsg-for] { display: block; min-height: 18px; margin-top: 3px; font-size: var(--texto-xs); line-height: 1.3; }
+.input-validation-error { border-color: var(--rojo) !important; background: #fffafa; }
+.validation-summary-errors { background: var(--rojo-fondo); color: var(--rojo); border-radius: var(--radio-sm); padding: 10px 14px; margin-bottom: 14px; font-size: var(--texto-sm); }
+.validation-summary-errors ul { margin: 0; padding-left: 18px; }
+.validation-summary-valid { display: none; }
+
+.zona-archivos {
+    display: block; border: 1.5px dashed var(--borde-fuerte); border-radius: var(--radio);
+    background: #e9eef3; text-align: center; padding: 26px 16px; cursor: pointer;
+}
+.zona-archivos:hover, .zona-archivos.arrastrando { border-color: var(--amarillo); background: #fff8e1; }
+.zona-archivos strong { display: block; font-size: var(--texto-sm); }
+.zona-archivos input { display: none; }
+.lista-archivos { font-size: var(--texto-xs); color: var(--texto-suave); margin-top: 6px; }
+
+.estado-fijo { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--borde); border-radius: var(--radio-sm); padding: 10px 14px; font-size: var(--texto-sm); flex-wrap: wrap; }
+
+.casillas { background: var(--tarjeta-suave); border: 1px solid var(--borde); border-radius: var(--radio-sm); padding: 6px 14px; }
+.casilla { display: flex; align-items: center; gap: 10px; padding: 7px 0; font-size: var(--texto-sm); font-weight: 600; cursor: pointer; }
+.casilla input { width: 16px; height: 16px; accent-color: var(--azul-marino); }
+
+/* ---------- 9. Búsqueda y chips de filtro ---------- */
+.filtros { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+.busqueda { flex: 1 1 280px; max-width: 380px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+    padding: 6px 12px; border-radius: 999px; border: 1px solid var(--borde-fuerte);
+    background: #fff; color: var(--texto); font-size: var(--texto-xs); font-weight: 600;
+    text-decoration: none; white-space: nowrap;
+}
+.chip:hover { border-color: var(--azul-marino); }
+.chip.activo { background: var(--azul-marino); border-color: var(--azul-marino); color: #fff; }
+
+/* ---------- 10. Tablas ---------- */
+.tabla-contenedor { overflow-x: auto; }
+.tabla { width: 100%; border-collapse: collapse; font-size: var(--texto-sm); }
+.tabla th { text-align: left; font-size: var(--texto-xs); font-weight: 600; color: var(--texto-suave); padding: 12px 14px; border-bottom: 1px solid var(--borde); white-space: nowrap; }
+.tabla td { padding: 13px 14px; border-bottom: 1px solid #eef1f4; vertical-align: middle; }
+.tabla tr:last-child td { border-bottom: 0; }
+.tabla .fila-click { cursor: pointer; }
+.tabla .fila-click:hover td { background: #f6f9fc; }
+.tabla .mono { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: var(--texto-xs); letter-spacing: .02em; }
+.tabla .fuerte { font-weight: 700; }
+.tabla .tenue { color: var(--texto-tenue); font-size: var(--texto-xs); }
+.tabla .derecha { text-align: right; }
+.vacio { text-align: center; color: var(--texto-suave); padding: 36px 16px; font-size: var(--texto-sm); }
+
+/* ---------- 11. Listas pequeñas (paneles) ---------- */
+.mini { border: 1px solid var(--borde); border-radius: var(--radio-sm); padding: 12px 14px; background: #fff; display: block; text-decoration: none; color: inherit; }
+.mini + .mini { margin-top: 10px; }
+a.mini:hover { border-color: var(--borde-fuerte); box-shadow: var(--sombra); }
+.mini-titulo { font-weight: 700; font-size: var(--texto-sm); }
+.mini-sub { color: var(--texto-tenue); font-size: var(--texto-xs); margin: 2px 0 8px; }
+.columna { background: #e9edf2; border-radius: var(--radio); padding: 14px; min-height: 120px; }
+.columna h3 { font-size: var(--texto-sm); }
+.columna .tarjeta-sub { margin-bottom: 10px; }
+.lista-simple { list-style: none; padding: 0; margin: 0; }
+.lista-simple li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #eef1f4; font-size: var(--texto-sm); align-items: center; }
+.lista-simple li:last-child { border-bottom: 0; }
+.actividad-item { padding: 9px 0; border-bottom: 1px solid #eef1f4; font-size: var(--texto-sm); }
+.actividad-item:last-child { border-bottom: 0; }
+
+/* ---------- 12. Ficha del vehículo ---------- */
+.aviso-rol { background: #e8eef4; border-radius: var(--radio-sm); padding: 10px 14px; font-size: var(--texto-xs); color: var(--texto-suave); margin-bottom: 16px; }
+.pasos { display: flex; align-items: flex-start; margin: 18px 0 10px; }
+.paso { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; min-width: 0; }
+.paso:not(:last-child)::after { content: ""; position: absolute; top: 15px; left: calc(50% + 20px); right: calc(-50% + 20px); height: 3px; background: var(--borde); border-radius: 2px; }
+.paso.completado:not(:last-child)::after { background: var(--azul-marino); }
+.paso-circulo { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: var(--texto-sm); font-weight: 700; background: var(--gris-fondo); color: var(--texto-suave); position: relative; z-index: 1; }
+.paso.completado .paso-circulo { background: var(--azul-marino); color: #fff; }
+.paso.actual .paso-circulo { background: var(--amarillo); color: var(--azul-marino); box-shadow: 0 0 0 4px #fff3c4; }
+.paso-titulo { font-size: var(--texto-xs); font-weight: 600; margin-top: 8px; padding: 0 4px; }
+.paso-estado { font-size: 0.6875rem; color: var(--texto-tenue); }
+.paso.actual .paso-estado { color: #c26a06; }
+.responsable { background: var(--tarjeta-suave); border-radius: var(--radio-sm); text-align: center; padding: 7px 10px; font-size: var(--texto-xs); color: var(--texto-suave); }
+.siguiente { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; background: var(--tarjeta-suave); border-radius: var(--radio-sm); padding: 8px 12px; font-size: var(--texto-xs); color: var(--texto-suave); margin-top: 10px; }
+.siguiente strong { color: var(--texto); font-size: var(--texto-sm); }
+.subtitulo-proceso { font-size: var(--texto-sm); font-weight: 700; margin-top: 4px; }
+.subtitulo-proceso + .tarjeta-sub { margin-bottom: 0; }
+
+.alerta { border-radius: var(--radio-sm); padding: 12px 14px; font-size: var(--texto-sm); margin-top: 12px; }
+.alerta strong { display: block; margin-bottom: 2px; }
+.alerta-exito { background: var(--verde-fondo); color: #14532d; border-left: 4px solid var(--verde); }
+.alerta-info { background: var(--azul-fondo); color: #1e3a8a; border-left: 4px solid var(--azul); }
+.alerta-morado { background: var(--morado-fondo); color: #4c1d95; border-left: 4px solid var(--morado); }
+.alerta-aviso { background: #fff6e0; color: #7c4a03; border-left: 4px solid var(--amarillo); }
+.alerta-teal { background: var(--teal-fondo); color: #134e4a; border-left: 4px solid var(--teal); }
+
+.datos dt { font-size: var(--texto-xs); color: var(--texto-tenue); margin-top: 10px; }
+.datos dt:first-child { margin-top: 0; }
+.datos dd { margin: 2px 0 0; font-size: var(--texto-sm); font-weight: 600; word-break: break-word; }
+
+.nota { padding: 10px 0; border-bottom: 1px solid #eef1f4; }
+.nota:last-child { border-bottom: 0; }
+.nota-meta { font-size: var(--texto-xs); color: var(--texto-tenue); }
+.nota-texto { font-size: var(--texto-sm); margin-top: 3px; }
+.nota-sistema .nota-texto { color: var(--texto-suave); font-style: italic; }
+
+.fotos-grupo + .fotos-grupo { margin-top: 16px; }
+.fotos-grupo h4 { font-size: var(--texto-sm); margin-bottom: 8px; }
+.fotos { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+.foto figure, .foto { margin: 0; }
+.foto-img { aspect-ratio: 4 / 3; border-radius: var(--radio-sm); overflow: hidden; display: grid; place-items: center; color: #fff; }
+.foto-img img { width: 100%; height: 100%; object-fit: cover; }
+.foto-img .icono { width: 42px; height: 42px; opacity: .95; }
+.foto figcaption { font-size: 0.6875rem; color: var(--texto-tenue); margin-top: 4px; }
+.tono-0 { background: #a8c4d8; } .tono-1 { background: #c9b4dc; } .tono-2 { background: #f1d3a8; }
+.tono-3 { background: #b7dcc4; } .tono-4 { background: #d8a9a9; }
+
+.form-en-linea { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+.form-en-linea .campo { flex: 1 1 220px; }
+.desplegable summary { cursor: pointer; list-style: none; display: inline-flex; }
+.desplegable summary::-webkit-details-marker { display: none; }
+.desplegable[open] summary { margin-bottom: 10px; }
+
+/* Tarjetas de vehículos disponibles */
+.tarjetas-vehiculos { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.tarjeta-vehiculo { background: #fff; border: 1px solid var(--borde); border-radius: var(--radio); padding: 12px; box-shadow: var(--sombra); }
+.tarjeta-vehiculo .foto-img { aspect-ratio: 16 / 10; margin-bottom: 12px; }
+.tarjeta-vehiculo .foto-img .icono { width: 64px; height: 64px; }
+.tarjeta-vehiculo-titulo { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- 13. Línea de tiempo (trazabilidad) ---------- */
+.linea-tiempo { list-style: none; margin: 0; padding: 0; position: relative; }
+.linea-tiempo::before { content: ""; position: absolute; left: 5px; top: 8px; bottom: 8px; width: 2px; background: var(--borde); }
+.linea-tiempo li { position: relative; padding: 0 0 18px 26px; }
+.linea-tiempo li:last-child { padding-bottom: 0; }
+.punto { position: absolute; left: 0; top: 4px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--borde); }
+.punto-azul { background: var(--azul); } .punto-verde { background: #16a34a; } .punto-naranja { background: #d97706; }
+.punto-amarillo { background: var(--amarillo); } .punto-morado { background: #8b5cf6; } .punto-gris { background: #6b7280; }
+.tiempo-fecha { font-size: var(--texto-xs); color: var(--texto-tenue); }
+.tiempo-quien { font-size: var(--texto-sm); font-weight: 700; }
+.tiempo-que { font-size: var(--texto-sm); color: var(--texto-suave); }
+
+/* ---------- 14. Gráfica de barras (reportes) ---------- */
+.grafica { display: flex; align-items: flex-end; gap: 14px; height: 200px; padding: 10px 4px 0; border-bottom: 1px solid var(--borde); overflow-x: auto; }
+.barra { flex: 1 0 34px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; text-decoration: none; color: inherit; }
+.barra-relleno { width: 100%; max-width: 46px; background: #1b4a6b; border-radius: 3px 3px 0 0; min-height: 2px; transition: background .15s; }
+.barra:hover .barra-relleno, .barra.activa .barra-relleno { background: var(--amarillo); }
+.barra-valor { font-size: var(--texto-xs); font-weight: 700; margin-bottom: 4px; }
+.grafica-meses { display: flex; gap: 14px; padding: 6px 4px 0; overflow-x: auto; }
+.grafica-meses span { flex: 1 0 34px; text-align: center; font-size: var(--texto-xs); color: var(--texto-suave); }
+.resumen-reporte { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 14px; font-size: var(--texto-sm); color: var(--texto-suave); }
+.resumen-reporte strong { color: var(--texto); font-size: var(--texto-lg); display: block; }
+
+/* ---------- 15. Mensajes (parcial _Mensajes) ---------- */
+.mensaje { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; border-radius: var(--radio-sm); padding: 12px 16px; margin-bottom: 16px; font-size: var(--texto-sm); }
+.mensaje-exito { background: var(--verde-fondo); color: #14532d; border: 1px solid #b7e4c7; }
+.mensaje-error { background: var(--rojo-fondo); color: #7f1d1d; border: 1px solid #f5c2c2; }
+.mensaje button { background: none; border: 0; color: inherit; font-size: 1.1rem; cursor: pointer; line-height: 1; }
+
+/* ---------- 16. Modales (<dialog>) ---------- */
+.modal { border: 0; border-radius: 10px; padding: 0; width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 40px); box-shadow: var(--sombra-modal); color: var(--texto); }
+.modal::backdrop { background: rgba(16, 29, 43, .55); }
+.modal-cuerpo { padding: 22px 24px; }
+.modal-cuerpo h2 { margin-bottom: 2px; }
+.modal-sub { color: var(--texto-suave); font-size: var(--texto-xs); margin-bottom: 16px; }
+
+/* ---------- 17. Inicio de sesión ---------- */
+.login { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; }
+.login-marca { background: var(--azul-marino); color: #fff; display: flex; flex-direction: column; justify-content: center; padding: 48px 8vw; }
+.login-marca .marca-nombre { font-size: 1.75rem; margin-bottom: 16px; }
+.login-lema { font-size: 1.75rem; font-weight: 700; line-height: 1.25; max-width: 440px; }
+.login-texto { color: #b8c6d3; font-size: var(--texto-sm); margin-top: 14px; max-width: 460px; }
+.login-panel { background: #fff; display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
+.login-form { width: 100%; max-width: 360px; }
+.login-form h1 { font-size: 1.5rem; }
+.credenciales { margin-top: 26px; font-size: var(--texto-xs); color: var(--texto-suave); }
+.credenciales summary { cursor: pointer; font-weight: 600; }
+.credenciales table { width: 100%; margin-top: 8px; border-collapse: collapse; }
+.credenciales td { padding: 4px 0; border-bottom: 1px solid #eef1f4; }
+.credenciales button { font-size: var(--texto-xs); }
+
+/* ---------- 18. Confirmación ---------- */
+.confirmacion { max-width: 520px; text-align: center; padding: 30px 24px; }
+.confirmacion-icono { width: 58px; height: 58px; border-radius: 50%; background: var(--verde-fondo); color: var(--verde); display: grid; place-items: center; margin: 0 auto 14px; }
+.confirmacion-icono .icono { width: 30px; height: 30px; }
+
+/* ---------- 19. Diseño responsive ---------- */
+@media (max-width: 1100px) {
+    .ficha { grid-template-columns: minmax(0, 1fr); }
+    .rejilla-2 { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 900px) {
+    .menu-lateral { transform: translateX(-100%); }
+    body.menu-abierto .menu-lateral { transform: none; }
+    body.menu-abierto .velo { display: block; position: fixed; inset: 0; background: rgba(16,29,43,.45); z-index: 25; }
+    .contenido { margin-left: 0; padding: 0 16px 40px; }
+    .barra-movil {
+        display: flex; align-items: center; gap: 12px;
+        position: sticky; top: 0; z-index: 20;
+        background: var(--azul-marino); color: #fff;
+        margin: 0 -16px 18px; padding: 12px 16px;
+    }
+    .barra-movil button { background: none; border: 0; color: #fff; cursor: pointer; padding: 4px; display: grid; }
+    .barra-movil .icono { width: 24px; height: 24px; }
+    .barra-movil .marca-nombre { font-size: 1.05rem; }
+    .rejilla-3, .rejilla-mitad { grid-template-columns: minmax(0, 1fr); }
+    .login { grid-template-columns: 1fr; }
+    .login-marca { padding: 36px 24px; }
+    .login-lema { font-size: 1.35rem; }
+}
+
+@media (max-width: 600px) {
+    h1 { font-size: 1.35rem; }
+    .fila-campos { grid-template-columns: 1fr; }
+    .kpis { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .kpi-valor { font-size: 1.6rem; }
+    .tarjeta { padding: 16px; }
+    .pasos { overflow-x: auto; padding-bottom: 4px; }
+    .paso { min-width: 76px; }
+    .busqueda { max-width: none; }
+    .tabla-responsive thead { display: none; }
+    .tabla-responsive tr { display: block; border-bottom: 1px solid var(--borde); padding: 8px 0; }
+    .tabla-responsive td { display: flex; justify-content: space-between; gap: 12px; border: 0; padding: 5px 14px; text-align: right; }
+    .tabla-responsive td::before { content: attr(data-label); color: var(--texto-tenue); font-size: var(--texto-xs); text-align: left; }
+    .tabla-responsive td.derecha { justify-content: flex-end; }
+}

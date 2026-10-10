@@ -1,0 +1,15 @@
+@model Fotografia
+@* Miniatura de una fotografía. Los datos de ejemplo no tienen archivo: se muestra un marcador de color. *@
+<figure class="foto">
+    <div class="foto-img tono-@(Model.Id % 5)">
+        @if (!string.IsNullOrEmpty(Model.Ruta))
+        {
+            <a href="@Model.Ruta" target="_blank" rel="noopener"><img src="@Model.Ruta" alt="@Model.Descripcion" loading="lazy" /></a>
+        }
+        else
+        {
+            @Iconos.Svg("auto")
+        }
+    </div>
+    <figcaption>@Model.Descripcion</figcaption>
+</figure>

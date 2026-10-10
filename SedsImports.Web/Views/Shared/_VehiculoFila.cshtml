@@ -1,0 +1,29 @@
+@model VehiculoListadoDto
+@* Fila de la tabla de vehículos. Toda la fila abre la ficha. *@
+@{
+    var mostrarDocumentacion = ViewData["MostrarDocumentacion"] as bool? == true;
+    var origen = ViewData["Origen"] as string;
+}
+<tr class="fila-click" tabindex="0" data-href="@Url.Action("Detalle", "Vehiculos", new { id = Model.Id, origen })">
+    <td class="fuerte" data-label="Vehículo">
+        <a asp-controller="Vehiculos" asp-action="Detalle" asp-route-id="@Model.Id" asp-route-origen="@origen" style="color:inherit;text-decoration:none">@Model.Nombre</a>
+    </td>
+    <td class="mono" data-label="VIN">@Model.Vin</td>
+    <td data-label="Color">@Model.Color</td>
+    <td data-label="Estado"><partial name="_EstadoBadge" model="Model.Estado" /></td>
+    @if (mostrarDocumentacion)
+    {
+        <td data-label="Documentación"><partial name="_EstadoBadge" model="Model.EstadoDocumentacion" /></td>
+    }
+    <td data-label="Siguiente acción">
+        @if (Model.SiguienteAccion != null)
+        {
+            <span>@Model.SiguienteAccion <span class="tenue">· @Model.ResponsableSiguiente</span></span>
+        }
+        else
+        {
+            <span class="tenue">—</span>
+        }
+    </td>
+    <td class="derecha" data-label="Ingreso">@Formato.Fecha(Model.FechaIngreso)</td>
+</tr>
