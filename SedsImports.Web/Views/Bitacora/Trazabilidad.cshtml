@@ -1,0 +1,44 @@
+@model TrazabilidadViewModel
+@{
+    ViewData["Title"] = "Trazabilidad";
+
+    // El botón "Volver" regresa a la pantalla desde donde se abrió la trazabilidad.
+    var (texto, url, menu) = Model.Origen switch
+    {
+        "bitacora" => ("← Volver a la bitácora", Url.Action("Index", "Bitacora"), "bitacora"),
+        "ventas" => ("← Volver a ventas", Url.Action("Index", "Ventas"), "ventas"),
+        _ => ("← Volver a la ficha", Url.Action("Detalle", "Vehiculos", new { id = Model.VehiculoId }), "vehiculos")
+    };
+    ViewData["Menu"] = menu;
+}
+
+<a class="btn btn-secundario btn-sm btn-volver" href="@url">@texto</a>
+
+<div class="encabezado">
+    <div>
+        <h1>Trazabilidad – @Model.Vehiculo</h1>
+        <p class="encabezado-sub">Historial cronológico solo de este vehículo · @Model.Movimientos.Count registro(s)</p>
+    </div>
+    <a class="btn btn-secundario btn-sm" asp-controller="Vehiculos" asp-action="Detalle" asp-route-id="@Model.VehiculoId">Ver ficha</a>
+</div>
+
+<section class="tarjeta">
+    @if (Model.Movimientos.Any())
+    {
+        <ol class="linea-tiempo">
+            @foreach (var m in Model.Movimientos)
+            {
+                <li>
+                    <span class="punto @m.Tipo.ClaseCss()" title="@m.Tipo.NombreVisible()"></span>
+                    <div class="tiempo-fecha">@Formato.FechaHora(m.Fecha)</div>
+                    <div class="tiempo-quien">@m.UsuarioNombre · @(m.RolTipo?.NombreCorto() ?? m.RolNombre)</div>
+                    <div class="tiempo-que">@m.Accion</div>
+                </li>
+            }
+        </ol>
+    }
+    else
+    {
+        <p class="vacio">Este vehículo todavía no tiene movimientos.</p>
+    }
+</section>

@@ -1,0 +1,57 @@
+@model BitacoraViewModel
+@{
+    ViewData["Title"] = "Bitácora";
+    ViewData["Menu"] = "bitacora";
+}
+
+<div class="encabezado">
+    <div>
+        <h1>Bitácora de cambios</h1>
+        <p class="encabezado-sub">Registro general con fecha, hora, usuario y acción.</p>
+    </div>
+</div>
+
+<div class="filtros">
+    <form asp-action="Index" method="get" class="busqueda" role="search">
+        <label class="sr-only" for="busqueda">Buscar</label>
+        <input class="campo" id="busqueda" name="busqueda" value="@Model.Busqueda" placeholder="Buscar por usuario, vehículo o acción" />
+    </form>
+    <span class="encabezado-sub" style="margin:0">@Model.Movimientos.Count registro(s)</span>
+</div>
+
+<section class="tarjeta tarjeta-sin-padding">
+    <div class="tabla-contenedor">
+        <table class="tabla tabla-responsive">
+            <thead>
+                <tr>
+                    <th>Fecha y hora</th>
+                    <th>Usuario</th>
+                    <th>Vehículo</th>
+                    <th>Acción</th>
+                    <th class="derecha"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var m in Model.Movimientos)
+                {
+                    <tr>
+                        <td data-label="Fecha y hora" style="white-space:nowrap">@Formato.FechaHora(m.Fecha)</td>
+                        <td data-label="Usuario">@m.UsuarioNombre <span class="tenue">· @(m.RolTipo?.NombreCorto() ?? m.RolNombre)</span></td>
+                        <td data-label="Vehículo">@(m.VehiculoNombre ?? "—")</td>
+                        <td data-label="Acción">@m.Accion</td>
+                        <td class="derecha" data-label="">
+                            @if (m.VehiculoId.HasValue)
+                            {
+                                <a class="btn-enlace" style="white-space:nowrap" asp-action="Trazabilidad" asp-route-id="@m.VehiculoId" asp-route-origen="bitacora">Ver trazabilidad</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @if (!Model.Movimientos.Any())
+    {
+        <p class="vacio">No hay registros que coincidan con la búsqueda.</p>
+    }
+</section>
