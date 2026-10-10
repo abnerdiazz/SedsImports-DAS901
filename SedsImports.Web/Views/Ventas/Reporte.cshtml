@@ -1,0 +1,101 @@
+@model ReporteViewModel
+@{
+    ViewData["Title"] = "Reportes de ventas";
+    ViewData["Menu"] = "reportes";
+
+    var anios = new SelectList(Model.AniosDisponibles, Model.Anio);
+    var meses = Enumerable.Range(1, 12).Select(m => new SelectListItem(Formato.NombreMes(m), m.ToString()));
+    var dias = Enumerable.Range(1, 31).Select(d => new SelectListItem(d.ToString(), d.ToString()));
+    var maximo = Math.Max(Model.Resultado.PorMes.Max(m => m.Cantidad), 1);
+
+    var periodo = Model.Mes.HasValue
+        ? (Model.Dia.HasValue ? $"{Model.Dia} de {Formato.NombreMes(Model.Mes.Value).ToLower()} de {Model.Anio}" : $"{Formato.NombreMes(Model.Mes.Value)} {Model.Anio}")
+        : $"Todo {Model.Anio}";
+}
+
+<div class="encabezado">
+    <div>
+        <h1>Reportes de ventas</h1>
+        <p class="encabezado-sub">Consulta ventas por período y vehículo.</p>
+    </div>
+</div>
+
+@* Formulario GET: los filtros se envían en la URL (Model Binding desde query string). Usa HTML Helpers. *@
+<form asp-action="Reporte" method="get" class="tarjeta" style="margin-bottom:16px">
+    <div class="filtros" style="margin:0;align-items:flex-end">
+        <div>
+            @Html.LabelFor(m => m.Anio, new { @class = "etiqueta" })
+            @Html.DropDownListFor(m => m.Anio, anios, new { @class = "campo", data_enviar_al_cambiar = "" })
+        </div>
+        <div>
+            @Html.LabelFor(m => m.Mes, new { @class = "etiqueta" })
+            @Html.DropDownListFor(m => m.Mes, meses, "Todos", new { @class = "campo", data_enviar_al_cambiar = "" })
+        </div>
+        <div>
+            @Html.LabelFor(m => m.Dia, new { @class = "etiqueta" })
+            @Html.DropDownListFor(m => m.Dia, dias, "Todos", new { @class = "campo", data_enviar_al_cambiar = "" })
+        </div>
+        <div style="flex:1 1 220px">
+            @Html.LabelFor(m => m.Busqueda, new { @class = "etiqueta" })
+            @Html.TextBoxFor(m => m.Busqueda, new { @class = "campo", placeholder = "Ej.: Toyota Corolla" })
+        </div>
+        <div class="acciones" style="margin:0">
+            <button type="submit" class="btn btn-oscuro">Consultar</button>
+            <a class="btn btn-secundario" asp-action="Reporte">Limpiar</a>
+        </div>
+    </div>
+</form>
+
+<section class="tarjeta">
+    <div class="tarjeta-titulo"><h2>Ventas por mes · @Model.Anio</h2></div>
+    <p class="tarjeta-sub">Unidades vendidas en cada mes. Haz clic en una barra para ver el detalle de ese mes.</p>
+
+    <div class="grafica" role="img" aria-label="Gráfica de unidades vendidas por mes">
+        @foreach (var m in Model.Resultado.PorMes)
+        {
+            var alto = m.Cantidad * 100.0 / maximo;
+            <a class="barra @(Model.Mes == m.Mes ? "activa" : "")" asp-action="Reporte" asp-route-anio="@Model.Anio" asp-route-mes="@m.Mes" asp-route-busqueda="@Model.Busqueda"
+               title="@m.NombreMes: @m.Cantidad unidad(es) · @Formato.Dinero(m.Total)">
+                <span class="barra-valor">@(m.Cantidad > 0 ? m.Cantidad.ToString() : "")</span>
+                <span class="barra-relleno" style="height:@alto.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture)%"></span>
+            </a>
+        }
+    </div>
+    <div class="grafica-meses" aria-hidden="true">
+        @foreach (var m in Model.Resultado.PorMes) { <span>@m.NombreMes</span> }
+    </div>
+</section>
+
+<section class="tarjeta">
+    <h2>Detalle de ventas</h2>
+    <p class="tarjeta-sub">Período: @periodo@(string.IsNullOrWhiteSpace(Model.Busqueda) ? "" : $" · Búsqueda: \"{Model.Busqueda}\"")</p>
+
+    <div class="resumen-reporte" style="margin:0 0 12px">
+        <div><strong>@Model.Resultado.TotalUnidades</strong>unidades vendidas</div>
+        <div><strong>@Formato.Dinero(Model.Resultado.TotalMonto)</strong>monto total</div>
+    </div>
+
+    @if (Model.Resultado.Detalle.Any())
+    {
+        <div class="tabla-contenedor">
+            <table class="tabla tabla-responsive">
+                <thead><tr><th>Vehículo</th><th>Cliente</th><th>Fecha</th><th class="derecha">Monto</th></tr></thead>
+                <tbody>
+                    @foreach (var d in Model.Resultado.Detalle)
+                    {
+                        <tr class="fila-click" tabindex="0" data-href="@Url.Action("Detalle", "Vehiculos", new { id = d.VehiculoId, origen = "ventas" })">
+                            <td class="fuerte" data-label="Vehículo">@d.Vehiculo</td>
+                            <td data-label="Cliente">@d.Cliente</td>
+                            <td data-label="Fecha">@Formato.Fecha(d.Fecha)</td>
+                            <td class="derecha" data-label="Monto">@Formato.Dinero(d.Monto)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <p class="vacio">No hay ventas registradas en el período seleccionado (0 unidades).</p>
+    }
+</section>

@@ -1,0 +1,11 @@
+@{
+    ViewData["Title"] = "Acceso denegado";
+}
+<div class="tarjeta confirmacion" style="margin: 40px auto;">
+    <div class="confirmacion-icono" style="background:var(--rojo-fondo);color:var(--rojo)">@Iconos.Svg("alerta")</div>
+    <h1 style="font-size:1.4rem">Acceso denegado</h1>
+    <p class="encabezado-sub" style="margin-top:8px">Tu perfil no tiene permiso para entrar a esta sección. Si crees que es un error, consulta con el dueño del negocio.</p>
+    <div class="acciones" style="justify-content:center">
+        <a class="btn btn-primario" asp-controller="Home" asp-action="Index">Volver al inicio</a>
+    </div>
+</div>

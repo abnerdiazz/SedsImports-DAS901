@@ -1,0 +1,49 @@
+@model InicioViewModel
+@* Panel del encargado de patio: lo que ha registrado y lo que espera al mecánico. *@
+<div class="kpis">
+    <div class="kpi"><div class="kpi-valor c-azul">@Model.RegistradosHoy</div><div class="kpi-etiqueta">Registrados hoy</div></div>
+    <div class="kpi"><div class="kpi-valor">@Model.RegistradosSemana</div><div class="kpi-etiqueta">Registrados últimos 7 días</div></div>
+    <a class="kpi" asp-controller="Vehiculos" asp-action="Index" asp-route-estado="RecienLlegado"><div class="kpi-valor c-naranja">@Model.RecienLlegados.Count</div><div class="kpi-etiqueta">Recién llegados</div></a>
+</div>
+
+<div class="rejilla-2">
+    <section class="tarjeta">
+        <div class="tarjeta-titulo"><h2>Últimos ingresos registrados</h2></div>
+        <div class="tabla-contenedor">
+            <table class="tabla tabla-responsive">
+                <thead><tr><th>Vehículo</th><th>Ingreso</th><th>Estado</th></tr></thead>
+                <tbody>
+                    @foreach (var v in Model.UltimosIngresos)
+                    {
+                        <tr class="fila-click" tabindex="0" data-href="@Url.Action("Detalle", "Vehiculos", new { id = v.Id })">
+                            <td class="fuerte" data-label="Vehículo">@v.Nombre</td>
+                            <td data-label="Ingreso">@Formato.FechaHora(v.FechaIngreso)</td>
+                            <td data-label="Estado"><partial name="_EstadoBadge" model="v.Estado" /></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (!Model.UltimosIngresos.Any())
+        {
+            <p class="vacio">Todavía no hay vehículos registrados.</p>
+        }
+    </section>
+
+    <section class="tarjeta">
+        <h2>Recién llegados</h2>
+        <p class="tarjeta-sub">Esperan que el mecánico inicie la revisión.</p>
+        @foreach (var v in Model.RecienLlegados)
+        {
+            <a class="mini" asp-controller="Vehiculos" asp-action="Detalle" asp-route-id="@v.Id">
+                <div class="mini-titulo">@v.Nombre</div>
+                <div class="mini-sub">VIN @v.VinCorto</div>
+                <partial name="_EstadoBadge" model="v.Estado" />
+            </a>
+        }
+        @if (!Model.RecienLlegados.Any())
+        {
+            <p class="vacio">No hay vehículos esperando revisión.</p>
+        }
+    </section>
+</div>

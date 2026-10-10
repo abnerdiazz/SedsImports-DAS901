@@ -1,0 +1,13 @@
+@model Revision?
+@* Resumen de cierre de la revisión: lo que hizo el mecánico y lo que le falta al vehículo. *@
+@if (Model?.FechaFinalizacion != null)
+{
+    <div class="alerta alerta-info">
+        <strong>Resumen del mecánico · @Model.MecanicoNombre · @Formato.FechaHora(Model.FechaFinalizacion.Value)</strong>
+        @Model.ResumenFinal
+    </div>
+    <div class="alerta alerta-aviso">
+        <strong>Pendientes / lo que le falta al vehículo</strong>
+        @Model.Pendientes
+    </div>
+}

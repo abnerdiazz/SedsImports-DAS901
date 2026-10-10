@@ -1,0 +1,10 @@
+@model int
+@* Formulario desplegable para regresar el vehículo a revisión indicando el motivo. *@
+<details class="desplegable" style="margin-top:12px">
+    <summary class="btn btn-secundario btn-sm">Regresar a revisión</summary>
+    <form asp-controller="Revisiones" asp-action="Regresar" method="post" class="form-en-linea">
+        <input type="hidden" name="VehiculoId" value="@Model" />
+        <input class="campo" name="Motivo" required minlength="5" maxlength="300" placeholder="Motivo (ej.: falta cambiar la llanta de repuesto)" aria-label="Motivo para regresar a revisión" />
+        <button type="submit" class="btn btn-oscuro">Regresar a revisión</button>
+    </form>
+</details>

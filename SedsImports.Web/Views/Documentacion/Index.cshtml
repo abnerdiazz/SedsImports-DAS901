@@ -1,0 +1,103 @@
+@model DocumentacionIndexViewModel
+@{
+    ViewData["Title"] = "Documentación";
+    ViewData["Menu"] = "documentacion";
+    var formularioVacio = new DocumentacionViewModel { Origen = "documentacion" };
+    var datosModal = new ViewDataDictionary(ViewData) { { "EnModal", true }, { "Prefijo", "md" } };
+}
+
+<div class="encabezado">
+    <div>
+        <h1>Documentación</h1>
+        <p class="encabezado-sub">Es un proceso paralelo: puedes actualizarla desde que el vehículo llega, sin esperar la revisión.</p>
+    </div>
+</div>
+
+<div class="filtros">
+    <form asp-action="Index" method="get" class="busqueda" role="search">
+        @if (Model.Filtro.HasValue) { <input type="hidden" name="filtro" value="@Model.Filtro" /> }
+        <label class="sr-only" for="busqueda">Buscar</label>
+        <input class="campo" id="busqueda" name="busqueda" value="@Model.Busqueda" placeholder="Buscar por marca, modelo, año o VIN" />
+    </form>
+    <nav class="chips" aria-label="Filtrar por documentación">
+        <a class="chip @(Model.Filtro == null ? "activo" : "")" asp-action="Index" asp-route-busqueda="@Model.Busqueda">Todos @Model.Total</a>
+        <a class="chip @(Model.Filtro == EstadoDocumentacion.Pendiente ? "activo" : "")" asp-action="Index" asp-route-filtro="Pendiente" asp-route-busqueda="@Model.Busqueda">Pendiente @Model.Pendientes</a>
+        <a class="chip @(Model.Filtro == EstadoDocumentacion.Completa ? "activo" : "")" asp-action="Index" asp-route-filtro="Completa" asp-route-busqueda="@Model.Busqueda">Completa @Model.Completas</a>
+    </nav>
+</div>
+
+<section class="tarjeta tarjeta-sin-padding">
+    <div class="tabla-contenedor">
+        <table class="tabla tabla-responsive">
+            <thead>
+                <tr>
+                    <th>Vehículo</th>
+                    <th>Estado operativo</th>
+                    <th>Documentación</th>
+                    <th>Observaciones</th>
+                    <th>Última actualización</th>
+                    <th class="derecha">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var fila in Model.Filas)
+                {
+                    var d = fila.Documentacion;
+                    var valores = System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object?>
+                    {
+                        ["VehiculoId"] = fila.Vehiculo.Id,
+                        ["Vehiculo"] = fila.Vehiculo.Nombre,
+                        ["EstadoOperativo"] = fila.Vehiculo.Estado.NombreVisible(),
+                        ["TieneTitulo"] = d.TieneTitulo,
+                        ["TieneImportacion"] = d.TieneImportacion,
+                        ["TieneTarjetaCirculacion"] = d.TieneTarjetaCirculacion,
+                        ["TieneTraspaso"] = d.TieneTraspaso,
+                        ["TieneOtros"] = d.TieneOtros,
+                        ["Estado"] = (int)d.Estado,
+                        ["Observaciones"] = d.Observaciones
+                    });
+                    <tr>
+                        <td data-label="Vehículo">
+                            <div class="fuerte">@fila.Vehiculo.Nombre</div>
+                            <div class="tenue">VIN @fila.Vehiculo.VinCorto</div>
+                        </td>
+                        <td data-label="Estado operativo"><partial name="_EstadoBadge" model="fila.Vehiculo.Estado" /></td>
+                        <td data-label="Documentación"><partial name="_EstadoBadge" model="d.Estado" /></td>
+                        <td data-label="Observaciones">@(d.Observaciones ?? "—")</td>
+                        <td data-label="Última actualización">
+                            @if (d.FechaActualizacion.HasValue)
+                            {
+                                <div>@Formato.FechaHora(d.FechaActualizacion.Value)</div>
+                                <div class="tenue">@d.ActualizadoPor</div>
+                            }
+                            else { <span class="tenue">—</span> }
+                        </td>
+                        <td class="derecha" data-label="Acciones">
+                            <div class="acciones" style="margin:0;justify-content:flex-end;flex-wrap:nowrap">
+                                <a class="btn btn-primario btn-sm" asp-action="Editar" asp-route-id="@fila.Vehiculo.Id"
+                                   data-abrir-modal="modal-documentacion" data-reiniciar data-valores="@valores">Actualizar</a>
+                                <a class="btn btn-secundario btn-sm" asp-controller="Vehiculos" asp-action="Detalle" asp-route-id="@fila.Vehiculo.Id" asp-route-origen="documentacion">Ver ficha</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @if (!Model.Filas.Any())
+    {
+        <p class="vacio">No se encontraron vehículos con ese criterio.</p>
+    }
+</section>
+
+<dialog id="modal-documentacion" class="modal" aria-labelledby="titulo-doc">
+    <div class="modal-cuerpo">
+        <h2 id="titulo-doc">Documentación</h2>
+        <p class="modal-sub"><span data-texto="Vehiculo"></span> · Estado operativo: <span data-texto="EstadoOperativo"></span></p>
+        <partial name="_FormDocumentacion" model="formularioVacio" view-data="datosModal" />
+    </div>
+</dialog>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,68 @@
+@model VehiculoListadoViewModel
+@{
+    ViewData["Title"] = "Vehículos";
+    ViewData["Menu"] = "vehiculos";
+    ViewData["MostrarDocumentacion"] = Model.MostrarDocumentacion;
+}
+
+<div class="encabezado">
+    <div>
+        <h1>Vehículos</h1>
+        <p class="encabezado-sub">@Model.Subtitulo</p>
+    </div>
+    @if (Model.PuedeRegistrar)
+    {
+        <div class="encabezado-acciones">
+            <a class="btn btn-primario" asp-action="Create">@Iconos.Svg("registrar") Registrar vehículo</a>
+        </div>
+    }
+</div>
+
+<div class="filtros">
+    <form asp-action="Index" method="get" class="busqueda" role="search">
+        @if (Model.EstadoFiltro.HasValue)
+        {
+            <input type="hidden" name="estado" value="@Model.EstadoFiltro" />
+        }
+        <label class="sr-only" for="busqueda">Buscar</label>
+        <input class="campo" id="busqueda" name="busqueda" value="@Model.Busqueda" placeholder="Buscar por marca, modelo, año o VIN" />
+    </form>
+
+    <nav class="chips" aria-label="Filtrar por estado">
+        <a class="chip @(Model.EstadoFiltro == null ? "activo" : "")" asp-action="Index" asp-route-busqueda="@Model.Busqueda">Todos @Model.Conteos.Total</a>
+        @foreach (var estado in Model.EstadosVisibles)
+        {
+            <a class="chip @(Model.EstadoFiltro == estado ? "activo" : "")" asp-action="Index" asp-route-estado="@estado" asp-route-busqueda="@Model.Busqueda">
+                @estado.NombreVisible() @Model.Conteos.De(estado)
+            </a>
+        }
+    </nav>
+</div>
+
+<section class="tarjeta tarjeta-sin-padding">
+    <div class="tabla-contenedor">
+        <table class="tabla tabla-responsive">
+            <thead>
+                <tr>
+                    <th>Vehículo</th>
+                    <th>VIN</th>
+                    <th>Color</th>
+                    <th>Estado</th>
+                    @if (Model.MostrarDocumentacion) { <th>Documentación</th> }
+                    <th>Siguiente acción</th>
+                    <th class="derecha">Ingreso</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var v in Model.Vehiculos)
+                {
+                    <partial name="_VehiculoFila" model="v" />
+                }
+            </tbody>
+        </table>
+    </div>
+    @if (!Model.Vehiculos.Any())
+    {
+        <p class="vacio">No se encontraron vehículos que coincidan con la búsqueda o el filtro.</p>
+    }
+</section>

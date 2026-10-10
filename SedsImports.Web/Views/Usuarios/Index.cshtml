@@ -1,0 +1,52 @@
+@model UsuariosViewModel
+@{
+    ViewData["Title"] = "Usuarios";
+    ViewData["Menu"] = "usuarios";
+}
+
+<div class="encabezado">
+    <div>
+        <h1>Usuarios</h1>
+        <p class="encabezado-sub">Administración de usuarios internos. Un usuario desactivado ya no puede iniciar sesión.</p>
+    </div>
+</div>
+
+<section class="tarjeta tarjeta-sin-padding">
+    <div class="tabla-contenedor">
+        <table class="tabla tabla-responsive">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Usuario</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th class="derecha">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var u in Model.Usuarios)
+                {
+                    <tr>
+                        <td class="fuerte" data-label="Nombre">@u.NombreCompleto</td>
+                        <td data-label="Usuario">@u.Correo</td>
+                        <td data-label="Rol">@u.Rol.Nombre</td>
+                        <td data-label="Estado"><span class="badge @(u.Activo ? "badge-disponible" : "badge-inactivo")">@(u.Activo ? "Activo" : "Inactivo")</span></td>
+                        <td class="derecha" data-label="Acción">
+                            @if (u.Id == Model.UsuarioActualId)
+                            {
+                                <span class="tenue">Tu usuario</span>
+                            }
+                            else
+                            {
+                                <form asp-action="CambiarEstado" asp-route-id="@u.Id" method="post"
+                                      data-confirmar="¿@(u.Activo ? "Desactivar" : "Activar") a @u.NombreCompleto?">
+                                    <button type="submit" class="btn-enlace" style="@(u.Activo ? "color:var(--rojo)" : "")">@(u.Activo ? "Desactivar" : "Activar")</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

@@ -1,0 +1,61 @@
+@model DisponiblesViewModel
+@{
+    ViewData["Title"] = "Disponibles";
+    ViewData["Menu"] = "disponibles";
+    var datosModal = new ViewDataDictionary(ViewData) { { "EnModal", true }, { "Prefijo", "ma" } };
+}
+
+<div class="encabezado">
+    <div>
+        <h1>Disponibles</h1>
+        <p class="encabezado-sub">Vehículos listos para ofrecer. Al registrar un apartado dejan de aparecer aquí.</p>
+    </div>
+</div>
+
+@if (Model.Vehiculos.Any())
+{
+    <div class="tarjetas-vehiculos">
+        @foreach (var v in Model.Vehiculos)
+        {
+            var valores = System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object?>
+            {
+                ["VehiculoId"] = v.Id,
+                ["Vehiculo"] = $"{v.Nombre} · VIN {v.VinCorto}",
+                ["Origen"] = "disponibles"
+            });
+            <article class="tarjeta-vehiculo">
+                <div class="foto-img tono-@v.IndiceColor">@Iconos.Svg("auto")</div>
+                <div class="tarjeta-vehiculo-titulo">
+                    <h3>@v.Nombre</h3>
+                    <partial name="_EstadoBadge" model="v.Estado" />
+                </div>
+                <p class="mini-sub">@v.Color · VIN @v.VinCorto · @v.CantidadFotosFinales foto(s) final(es)</p>
+                <partial name="_EstadoBadge" model="v.EstadoDocumentacion" />
+                <div class="acciones">
+                    @if (Model.PuedeApartar)
+                    {
+                        <a class="btn btn-primario btn-sm" asp-action="Crear" asp-route-vehiculoId="@v.Id" asp-route-origen="disponibles"
+                           data-abrir-modal="modal-apartado" data-reiniciar data-valores="@valores">Registrar apartado</a>
+                    }
+                    <a class="btn btn-secundario btn-sm" asp-controller="Vehiculos" asp-action="Detalle" asp-route-id="@v.Id" asp-route-origen="disponibles">Ver ficha</a>
+                </div>
+            </article>
+        }
+    </div>
+}
+else
+{
+    <section class="tarjeta"><p class="vacio">No hay vehículos disponibles. Los vehículos aparecen aquí cuando el dueño autoriza su disponibilidad.</p></section>
+}
+
+<dialog id="modal-apartado" class="modal" aria-labelledby="titulo-apartado">
+    <div class="modal-cuerpo">
+        <h2 id="titulo-apartado">Registrar apartado</h2>
+        <p class="modal-sub" data-texto="Vehiculo"></p>
+        <partial name="_FormApartado" model="Model.NuevoApartado" view-data="datosModal" />
+    </div>
+</dialog>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

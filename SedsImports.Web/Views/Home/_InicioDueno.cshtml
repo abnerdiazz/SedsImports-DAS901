@@ -1,0 +1,50 @@
+@model InicioViewModel
+@* Panel del dueño / vendedor: visión general del negocio y lo que espera su autorización. *@
+<div class="kpis">
+    <a class="kpi" asp-controller="Vehiculos" asp-action="Index"><div class="kpi-valor">@Model.Conteos.Total</div><div class="kpi-etiqueta">Vehículos</div></a>
+    <a class="kpi" asp-controller="Vehiculos" asp-action="Index" asp-route-estado="RecienLlegado"><div class="kpi-valor c-azul">@Model.Conteos.De(EstadoVehiculo.RecienLlegado)</div><div class="kpi-etiqueta">Recién llegados</div></a>
+    <a class="kpi" asp-controller="Vehiculos" asp-action="Index" asp-route-estado="EnRevision"><div class="kpi-valor c-naranja">@Model.Conteos.De(EstadoVehiculo.EnRevision)</div><div class="kpi-etiqueta">En revisión</div></a>
+    <a class="kpi" asp-controller="Vehiculos" asp-action="Index" asp-route-estado="RevisionFinalizada"><div class="kpi-valor c-teal">@Model.Conteos.De(EstadoVehiculo.RevisionFinalizada)</div><div class="kpi-etiqueta">Por autorizar</div></a>
+    <a class="kpi" asp-controller="Apartados" asp-action="Disponibles"><div class="kpi-valor c-verde">@Model.Conteos.De(EstadoVehiculo.Disponible)</div><div class="kpi-etiqueta">Disponibles</div></a>
+    <a class="kpi" asp-controller="Apartados" asp-action="Index"><div class="kpi-valor c-morado">@Model.Conteos.De(EstadoVehiculo.Apartado)</div><div class="kpi-etiqueta">Apartados</div></a>
+    <a class="kpi" asp-controller="Ventas" asp-action="Index"><div class="kpi-valor c-gris">@Model.VendidosMes</div><div class="kpi-etiqueta">Vendidos este mes</div></a>
+    <a class="kpi" asp-controller="Ventas" asp-action="Reporte"><div class="kpi-valor">@Formato.Dinero(Model.VentasMes)</div><div class="kpi-etiqueta">Ventas del mes</div></a>
+</div>
+
+@if (Model.PorAutorizar.Any())
+{
+    <section class="tarjeta" style="border-left:4px solid var(--teal)">
+        <h2>Pendientes de tu autorización</h2>
+        <p class="tarjeta-sub">El mecánico terminó la revisión. Revisa sus notas y decide si el vehículo queda disponible para la venta.</p>
+        @foreach (var v in Model.PorAutorizar)
+        {
+            <a class="mini" asp-controller="Vehiculos" asp-action="Detalle" asp-route-id="@v.Id" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+                <div>
+                    <div class="mini-titulo">@v.Nombre</div>
+                    <div class="mini-sub" style="margin:0">VIN @v.VinCorto · @v.CantidadNotas anotación(es) · @v.CantidadFotosFinales foto(s) final(es)</div>
+                </div>
+                <span class="btn btn-primario btn-sm">Revisar y autorizar</span>
+            </a>
+        }
+    </section>
+}
+
+<section class="tarjeta">
+    <h2>Vehículos por estado</h2>
+    <partial name="_BarraEstados" model="Model.Conteos" />
+</section>
+
+<section class="tarjeta">
+    <div class="tarjeta-titulo">
+        <h2>Actividad reciente</h2>
+        <a class="btn btn-secundario btn-sm" asp-controller="Bitacora" asp-action="Index">Ver bitácora</a>
+    </div>
+    @foreach (var m in Model.ActividadReciente)
+    {
+        <div class="actividad-item">
+            <div class="fuerte" style="font-weight:700">@m.UsuarioNombre <span class="nota-meta">· @Formato.FechaHora(m.Fecha)</span></div>
+            <div class="tiempo-que">@(m.VehiculoNombre != null ? m.VehiculoNombre + " — " : "")@m.Accion</div>
+        </div>
+    }
+    @if (!Model.ActividadReciente.Any()) { <p class="vacio">Sin actividad registrada.</p> }
+</section>

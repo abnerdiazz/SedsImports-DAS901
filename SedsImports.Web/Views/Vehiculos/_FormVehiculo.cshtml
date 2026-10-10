@@ -1,0 +1,49 @@
+@model VehiculoFormViewModel
+@* Campos compartidos entre "Registrar vehículo" y "Editar vehículo". *@
+<div asp-validation-summary="ModelOnly"></div>
+
+<div class="fila-campos">
+    <div class="grupo">
+        <label class="etiqueta" asp-for="Marca">Marca <span class="req">*</span></label>
+        <input class="campo" asp-for="Marca" placeholder="Toyota" />
+        <span asp-validation-for="Marca"></span>
+    </div>
+    <div class="grupo">
+        <label class="etiqueta" asp-for="Modelo">Modelo <span class="req">*</span></label>
+        <input class="campo" asp-for="Modelo" placeholder="Corolla" />
+        <span asp-validation-for="Modelo"></span>
+    </div>
+    <div class="grupo">
+        <label class="etiqueta" asp-for="Anio">Año <span class="req">*</span></label>
+        <input class="campo" asp-for="Anio" type="number" min="1950" max="@(DateTime.Today.Year + 1)" placeholder="@DateTime.Today.Year" />
+        <span asp-validation-for="Anio"></span>
+    </div>
+    <div class="grupo">
+        <label class="etiqueta" asp-for="Color">Color <span class="req">*</span></label>
+        <input class="campo" asp-for="Color" placeholder="Blanco" />
+        <span asp-validation-for="Color"></span>
+    </div>
+</div>
+
+<div class="grupo">
+    <label class="etiqueta" asp-for="Vin">VIN <span class="req">*</span></label>
+    <input class="campo" asp-for="Vin" placeholder="JTDBR32E220123456" style="text-transform:uppercase" maxlength="17" />
+    <span asp-validation-for="Vin"></span>
+    <div class="ayuda">Número de identificación del vehículo (11 a 17 caracteres). No se puede repetir.</div>
+</div>
+
+<div class="grupo">
+    <label class="etiqueta" asp-for="Detalles"></label>
+    <textarea class="campo" asp-for="Detalles" placeholder="Golpes, kilometraje, testigos encendidos..."></textarea>
+    <span asp-validation-for="Detalles"></span>
+</div>
+
+<div class="grupo">
+    <span class="etiqueta">@Html.DisplayNameFor(m => m.Fotos)</span>
+    <label class="zona-archivos" data-zona-archivos>
+        <input type="file" name="Fotos" multiple accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+        <strong>Arrastra fotografías aquí o selecciona archivos</strong>
+        <span class="ayuda">JPG, PNG o WEBP · hasta 5 MB cada una · opcional</span>
+    </label>
+    <div class="lista-archivos" data-lista-archivos></div>
+</div>

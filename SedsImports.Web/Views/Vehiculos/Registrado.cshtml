@@ -1,0 +1,19 @@
+@model VehiculoRegistradoViewModel
+@{
+    ViewData["Title"] = "Vehículo registrado";
+    ViewData["Menu"] = "registrar";
+}
+
+<div class="encabezado"><h1>Registrar vehículo</h1></div>
+
+<section class="tarjeta confirmacion">
+    <div class="confirmacion-icono">@Iconos.Svg("check")</div>
+    <h2>Vehículo registrado correctamente.</h2>
+    <p style="margin-top:12px;font-size:var(--texto-sm)">Estado inicial: <partial name="_EstadoBadge" model="Model.Estado" /></p>
+    <p class="encabezado-sub" style="margin-top:8px">@Model.Nombre · VIN @Model.Vin</p>
+    <p class="ayuda">Ya aparece en la lista de recién llegados del mecánico.</p>
+    <div class="acciones" style="justify-content:center">
+        <a class="btn btn-secundario" asp-action="Create">Registrar otro vehículo</a>
+        <a class="btn btn-primario" asp-action="Detalle" asp-route-id="@Model.Id">Ver ficha</a>
+    </div>
+</section>

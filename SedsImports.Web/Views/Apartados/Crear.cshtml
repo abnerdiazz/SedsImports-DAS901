@@ -1,0 +1,22 @@
+@model ApartadoViewModel
+@{
+    ViewData["Title"] = "Registrar apartado";
+    ViewData["Menu"] = "disponibles";
+}
+
+<a class="btn btn-secundario btn-sm btn-volver" asp-action="Disponibles">← Volver a disponibles</a>
+
+<div class="encabezado">
+    <div>
+        <h1>Registrar apartado</h1>
+        <p class="encabezado-sub">@Model.Vehiculo</p>
+    </div>
+</div>
+
+<section class="tarjeta formulario" style="max-width:560px">
+    <partial name="_FormApartado" model="Model" />
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

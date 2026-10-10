@@ -1,0 +1,65 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Iniciar sesión";
+    ViewData["SinMenu"] = true;
+    var pruebas = new[]
+    {
+        ("Mario Sánchez", "Encargado de patio", "mario.sanchez@sedimports.com"),
+        ("José Hernández", "Mecánico", "jose.hernandez@sedimports.com"),
+        ("Dania Martínez", "Asistente administrativa", "dania.martinez@sedimports.com"),
+        ("Ernesto Rivas", "Dueño / vendedor", "ernesto.rivas@sedimports.com")
+    };
+}
+<div class="login">
+    <section class="login-marca">
+        <div class="marca-nombre">SED's <span>Imports</span></div>
+        <p class="login-lema">Un solo lugar para saber en qué va cada vehículo</p>
+        <p class="login-texto">Desde que llega al patio hasta que se vende: estado, notas del mecánico, documentación y apartados, con el historial de quién hizo cada cambio.</p>
+    </section>
+
+    <section class="login-panel">
+        <div class="login-form">
+            <h1>Iniciar sesión</h1>
+            <p class="encabezado-sub" style="margin-bottom:20px">Usa tu cuenta de SED's Imports &amp; Services.</p>
+
+            <partial name="_Mensajes" />
+
+            <form asp-action="Index" method="post" novalidate>
+                <input type="hidden" asp-for="ReturnUrl" />
+                <div asp-validation-summary="ModelOnly"></div>
+
+                <div class="grupo">
+                    <label class="etiqueta" asp-for="Correo"></label>
+                    <input class="campo" asp-for="Correo" placeholder="usuario@sedimports.com" autocomplete="username" />
+                    <span asp-validation-for="Correo"></span>
+                </div>
+                <div class="grupo">
+                    <label class="etiqueta" asp-for="Contrasena"></label>
+                    <input class="campo" asp-for="Contrasena" placeholder="••••••••" autocomplete="current-password" />
+                    <span asp-validation-for="Contrasena"></span>
+                </div>
+                <button type="submit" class="btn btn-primario btn-bloque" style="margin-top:6px">Iniciar sesión</button>
+            </form>
+
+            <details class="credenciales">
+                <summary>Usuarios de prueba del prototipo</summary>
+                <p style="margin-top:6px">Contraseña para todos: <strong>@SedsImports.Web.Data.DatosIniciales.ContrasenaDemo</strong></p>
+                <table>
+                    @foreach (var (nombre, rol, correo) in pruebas)
+                    {
+                        <tr>
+                            <td><strong>@nombre</strong><br />@rol</td>
+                            <td style="text-align:right">
+                                <button type="button" class="btn btn-secundario btn-sm" data-usuario-prueba="@correo" data-contrasena="@SedsImports.Web.Data.DatosIniciales.ContrasenaDemo">Usar</button>
+                            </td>
+                        </tr>
+                    }
+                </table>
+            </details>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

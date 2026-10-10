@@ -1,0 +1,417 @@
+@model VehiculoDetalleViewModel
+@{
+    var v = Model.Vehiculo;
+    var estado = v.Estado;
+    var docPendiente = Model.Documentacion.Estado == EstadoDocumentacion.Pendiente;
+    ViewData["Title"] = v.NombreCompleto;
+
+    // El botón "Volver" y el menú activo dependen de la pantalla desde donde se abrió la ficha.
+    var (textoVolver, urlVolver, menu) = Model.Origen switch
+    {
+        "ventas" => ("← Volver a ventas", Url.Action("Index", "Ventas"), "ventas"),
+        "apartados" => ("← Volver a apartados", Url.Action("Index", "Apartados"), "apartados"),
+        "disponibles" => ("← Volver a disponibles", Url.Action("Disponibles", "Apartados"), "disponibles"),
+        "documentacion" => ("← Volver a documentación", Url.Action("Index", "Documentacion"), "documentacion"),
+        "inicio" => ("← Volver al inicio", Url.Action("Index", "Home"), "inicio"),
+        _ => ("← Volver a vehículos", Url.Action("Index", "Vehiculos"), "vehiculos")
+    };
+    ViewData["Menu"] = menu;
+
+    var avisoRol = Model.Rol switch
+    {
+        TipoRol.EncargadoPatio => "Encargado de patio: puedes consultar la ficha y corregir los datos del registro.",
+        TipoRol.Mecanico => "Mecánico: puedes iniciar la revisión, anotar trabajos, subir fotografías, finalizar la revisión y regresar el vehículo a revisión indicando el motivo. El dueño autoriza la disponibilidad para la venta.",
+        TipoRol.AsistenteAdministrativa => "Modo consulta: tu acción en esta ficha es actualizar la documentación.",
+        _ => "Dueño / vendedor. Acceso total: puedes autorizar, apartar, vender, editar y consultar la trazabilidad."
+    };
+
+    ViewDataDictionary Datos(string prefijo) => new ViewDataDictionary(ViewData) { { "EnModal", true }, { "Prefijo", prefijo } };
+}
+
+<a class="btn btn-secundario btn-sm btn-volver" href="@urlVolver">@textoVolver</a>
+
+<div class="encabezado">
+    <div>
+        <h1>@v.NombreCompleto</h1>
+        <p class="encabezado-sub">VIN @v.Vin · @v.Color · Ingresó el @Formato.Fecha(v.FechaIngreso)</p>
+    </div>
+    <div class="encabezado-acciones">
+        <partial name="_EstadoBadge" model="estado" />
+        @if (Model.EsAsistente || Model.EsDueno)
+        {
+            <partial name="_EstadoBadge" model="Model.Documentacion.Estado" />
+        }
+        @if (Model.PuedeEditar)
+        {
+            <a class="btn btn-secundario btn-sm" asp-action="Editar" asp-route-id="@v.Id">@Iconos.Svg("editar") Editar datos</a>
+        }
+        @if (Model.EsDueno)
+        {
+            <a class="btn btn-secundario btn-sm" asp-controller="Bitacora" asp-action="Trazabilidad" asp-route-id="@v.Id" asp-route-origen="ficha">Ver trazabilidad</a>
+        }
+    </div>
+</div>
+
+<div class="aviso-rol">@avisoRol</div>
+
+<div class="ficha">
+    <div>
+        @* ───────────── Estado del vehículo ───────────── *@
+        <section class="tarjeta">
+            <h2>@(Model.EsMecanico ? "Flujo técnico" : "Estado del vehículo")</h2>
+            @if (Model.EsAsistente || Model.EsDueno)
+            {
+                <div class="subtitulo-proceso" style="margin-top:10px">Proceso del vehículo</div>
+                <p class="tarjeta-sub">Operativo y comercial</p>
+            }
+
+            <partial name="_Pasos" model="Model.PasosProceso" />
+            <div class="responsable">Responsable: @Model.ResponsableActual</div>
+
+            @if (Model.EsAsistente || Model.EsDueno)
+            {
+                <div class="subtitulo-proceso" style="margin-top:18px">Documentación</div>
+                <p class="tarjeta-sub">Proceso paralelo: no detiene la revisión ni la venta</p>
+                <partial name="_Pasos" model="Model.PasosDocumentacion" />
+                <div class="responsable">Responsable: Asistente administrativa@(Model.Documentacion.ActualizadoPor != null ? " · Última actualización: " + Model.Documentacion.ActualizadoPor + ", " + Formato.FechaHora(Model.Documentacion.FechaActualizacion!.Value) : "")</div>
+
+                @if (Model.SiguienteAccion != null)
+                {
+                    <div class="siguiente">
+                        <span>Siguiente acción</span>
+                        <strong>@Model.SiguienteAccion</strong>
+                        <span>Responsable: @Model.ResponsableSiguiente</span>
+                        @if (Model.SiguienteMeCorresponde) { <span class="badge etiqueta-mia">Te corresponde</span> }
+                    </div>
+                }
+                @if (docPendiente && estado != EstadoVehiculo.Vendido)
+                {
+                    <div class="siguiente">
+                        <span>Documentación</span>
+                        <strong>Completar documentación</strong>
+                        <span>Responsable: Asistente administrativa</span>
+                        @if (Model.EsAsistente) { <span class="badge etiqueta-mia">Te corresponde</span> }
+                    </div>
+                }
+            }
+
+            <div class="tarjeta-seccion">
+                @* ---------- Acciones del MECÁNICO ---------- *@
+                @if (Model.EsMecanico)
+                {
+                    switch (estado)
+                    {
+                        case EstadoVehiculo.RecienLlegado:
+                            <h3>Recién llegado</h3>
+                            <p class="encabezado-sub">Vehículo pendiente de iniciar revisión.</p>
+                            <form asp-controller="Revisiones" asp-action="Iniciar" method="post" class="acciones">
+                                <input type="hidden" name="vehiculoId" value="@v.Id" />
+                                <button type="submit" class="btn btn-primario">Iniciar revisión</button>
+                            </form>
+                            break;
+
+                        case EstadoVehiculo.EnRevision:
+                            <h3>En revisión / preparación</h3>
+                            <p class="encabezado-sub">El vehículo se está trabajando. Registra cada trabajo en las notas y finaliza cuando esté listo. Al finalizar, el dueño deberá autorizar que quede disponible para la venta.</p>
+                            <div class="acciones">
+                                <a class="btn btn-primario" asp-controller="Revisiones" asp-action="Editar" asp-route-id="@v.Id">Finalizar revisión</a>
+                            </div>
+                            break;
+
+                        case EstadoVehiculo.RevisionFinalizada:
+                            <div class="alerta alerta-teal" style="margin-top:0">
+                                <strong>Revisión finalizada · esperando autorización del dueño</strong>
+                                El vehículo no queda disponible para la venta hasta que el dueño lo autorice.
+                            </div>
+                            <partial name="_ResumenRevision" model="Model.Revision" />
+                            <partial name="_RegresarRevision" model="v.Id" />
+                            break;
+
+                        case EstadoVehiculo.Disponible:
+                            <div class="alerta alerta-exito" style="margin-top:0">
+                                <strong>Disponible para venta</strong>
+                                Revisión finalizada y autorizada por @(Model.Revision?.AutorizadoPor ?? "el dueño"). Puedes subir fotografías finales en la sección Fotografías.
+                            </div>
+                            <partial name="_RegresarRevision" model="v.Id" />
+                            break;
+                    }
+                }
+
+                @* ---------- ENCARGADO DE PATIO ---------- *@
+                @if (Model.EsPatio)
+                {
+                    <p class="encabezado-sub" style="margin:0">
+                        @(estado switch
+                        {
+                            EstadoVehiculo.RecienLlegado => "Vehículo registrado correctamente. Está pendiente de que el mecánico inicie la revisión.",
+                            EstadoVehiculo.EnRevision => "El mecánico está trabajando el vehículo.",
+                            EstadoVehiculo.RevisionFinalizada => "El mecánico terminó la revisión; falta la autorización del dueño.",
+                            EstadoVehiculo.Disponible => "El vehículo está disponible para la venta.",
+                            EstadoVehiculo.Apartado => "El vehículo está apartado por un cliente.",
+                            _ => "El vehículo ya fue vendido."
+                        })
+                    </p>
+                    @if (Model.PuedeEditar)
+                    {
+                        <div class="acciones"><a class="btn btn-secundario" asp-action="Editar" asp-route-id="@v.Id">@Iconos.Svg("editar") Editar datos del vehículo</a></div>
+                    }
+                }
+
+                @* ---------- ASISTENTE ADMINISTRATIVA ---------- *@
+                @if (Model.EsAsistente)
+                {
+                    <h3>@estado.NombreVisible()</h3>
+                    <p class="encabezado-sub">
+                        @(estado switch
+                        {
+                            EstadoVehiculo.RecienLlegado => "Vehículo pendiente de iniciar revisión. Puedes ir completando su documentación.",
+                            EstadoVehiculo.EnRevision => "El mecánico está trabajando el vehículo.",
+                            EstadoVehiculo.RevisionFinalizada => "Revisión terminada; espera la autorización del dueño.",
+                            EstadoVehiculo.Disponible => "Disponible para ofrecer a los clientes.",
+                            EstadoVehiculo.Apartado => "Apartado: no ofrecer a otros clientes.",
+                            _ => "Vehículo vendido."
+                        })
+                    </p>
+                    <div class="acciones">
+                        <button type="button" class="btn btn-primario" data-abrir-modal="modal-documentacion">Actualizar documentación</button>
+                    </div>
+                }
+
+                @* ---------- DUEÑO / VENDEDOR ---------- *@
+                @if (Model.EsDueno)
+                {
+                    switch (estado)
+                    {
+                        case EstadoVehiculo.RecienLlegado:
+                        case EstadoVehiculo.EnRevision:
+                            <h3>@estado.NombreVisible()</h3>
+                            <p class="encabezado-sub">El vehículo está en manos del mecánico. Cuando termine la revisión te llegará para autorizar su disponibilidad.</p>
+                            break;
+
+                        case EstadoVehiculo.RevisionFinalizada:
+                            <h3>Autorización de disponibilidad</h3>
+                            <p class="encabezado-sub">El mecánico terminó la revisión. Revisa sus últimos apuntes y decide si el vehículo queda disponible para la venta.</p>
+                            <partial name="_ResumenRevision" model="Model.Revision" />
+                            <div class="acciones">
+                                <form asp-action="Autorizar" asp-route-id="@v.Id" method="post" data-confirmar="¿Autorizar que @v.NombreCompleto quede disponible para la venta?">
+                                    <button type="submit" class="btn btn-exito">@Iconos.Svg("check") Autorizar: disponible para venta</button>
+                                </form>
+                            </div>
+                            <partial name="_RegresarRevision" model="v.Id" />
+                            break;
+
+                        case EstadoVehiculo.Disponible:
+                            <div class="alerta alerta-exito" style="margin-top:0">
+                                <strong>Disponible para venta</strong>
+                                Autorizado@(Model.Revision?.FechaAutorizacion != null ? " el " + Formato.Fecha(Model.Revision.FechaAutorizacion.Value) : "").
+                            </div>
+                            <div class="acciones">
+                                <button type="button" class="btn btn-primario" data-abrir-modal="modal-apartado">Registrar apartado</button>
+                                <button type="button" class="btn btn-secundario" data-abrir-modal="modal-venta">Registrar venta directa</button>
+                            </div>
+                            <partial name="_RegresarRevision" model="v.Id" />
+                            break;
+
+                        case EstadoVehiculo.Apartado:
+                            <h3>Apartado</h3>
+                            @if (Model.Apartado != null && Model.ClienteApartado != null)
+                            {
+                                <div class="alerta alerta-morado">
+                                    @Model.ClienteApartado.Nombre dejó un anticipo de @Formato.Dinero(Model.Apartado.Anticipo) el @Formato.Fecha(Model.Apartado.FechaApartado). Contacto: @Model.ClienteApartado.Telefono
+                                </div>
+                            }
+                            <div class="acciones">
+                                <button type="button" class="btn btn-primario" data-abrir-modal="modal-venta">Registrar venta</button>
+                            </div>
+                            <details class="desplegable" style="margin-top:12px">
+                                <summary class="btn btn-peligro btn-sm">Cancelar apartado</summary>
+                                <form asp-controller="Apartados" asp-action="Cancelar" method="post" class="form-en-linea">
+                                    <input type="hidden" name="VehiculoId" value="@v.Id" />
+                                    <input class="campo" name="Motivo" required minlength="5" maxlength="300" placeholder="Motivo de la cancelación" />
+                                    <button type="submit" class="btn btn-peligro">Confirmar cancelación</button>
+                                </form>
+                            </details>
+                            break;
+
+                        case EstadoVehiculo.Vendido:
+                            <h3>Vendido</h3>
+                            <div class="alerta alerta-exito">
+                                Vendido a <strong style="display:inline">@(Model.ClienteVenta?.Nombre ?? "—")</strong> el @(Model.Venta != null ? Formato.Fecha(Model.Venta.FechaVenta) : "—").
+                            </div>
+                            break;
+                    }
+
+                    @if (docPendiente && estado is EstadoVehiculo.Disponible or EstadoVehiculo.Apartado)
+                    {
+                        <div class="alerta alerta-aviso">
+                            <strong>Documentación pendiente</strong>
+                            @Model.Documentacion.Observaciones No impide apartar o vender, pero conviene completarla antes de la entrega.
+                        </div>
+                    }
+                    @if (estado != EstadoVehiculo.Vendido)
+                    {
+                        <div class="acciones">
+                            <button type="button" class="btn-enlace" data-abrir-modal="modal-documentacion">Actualizar documentación</button>
+                        </div>
+                    }
+                }
+            </div>
+        </section>
+
+        @* ───────────── Notas de revisión ───────────── *@
+        @if (!Model.EsPatio)
+        {
+            var notas = Model.Revision?.Notas.OrderByDescending(n => n.Fecha).ToList() ?? new List<NotaRevision>();
+            <section class="tarjeta" id="notas">
+                <h2>Notas de revisión</h2>
+
+                @if (Model.EsMecanico && estado == EstadoVehiculo.EnRevision)
+                {
+                    <form asp-controller="Revisiones" asp-action="AgregarNota" method="post" style="margin:12px 0 6px">
+                        <input type="hidden" name="VehiculoId" value="@v.Id" />
+                        <label class="etiqueta" for="nota-texto">Nueva anotación</label>
+                        <textarea class="campo" id="nota-texto" name="Texto" required minlength="3" maxlength="500" placeholder="Ej.: Cambio de aceite y filtros realizado."></textarea>
+                        <div class="acciones" style="margin-top:10px"><button type="submit" class="btn btn-oscuro">Agregar anotación</button></div>
+                    </form>
+                }
+                else if (Model.EsMecanico && estado == EstadoVehiculo.RecienLlegado)
+                {
+                    <p class="ayuda" style="margin:8px 0">Inicia la revisión para poder agregar anotaciones.</p>
+                }
+
+                @foreach (var n in notas)
+                {
+                    <div class="nota @(n.EsDelSistema ? "nota-sistema" : "")">
+                        <div class="nota-meta">@Formato.FechaHora(n.Fecha) · @n.UsuarioNombre</div>
+                        <div class="nota-texto">@n.Texto</div>
+                    </div>
+                }
+                @if (!notas.Any())
+                {
+                    <p class="encabezado-sub" style="margin-top:8px">Aún no hay anotaciones de revisión.</p>
+                }
+            </section>
+        }
+
+        @* ───────────── Fotografías ───────────── *@
+        <section class="tarjeta" id="fotos">
+            <h2>@(Model.EsPatio ? "Fotografías al ingreso" : "Fotografías")</h2>
+            <p class="tarjeta-sub">@(Model.EsPatio ? "Fotografías cargadas al momento del registro." : "Consúltalas como referencia para las publicaciones.")</p>
+
+            @foreach (var tipo in Model.EsPatio ? new[] { TipoFoto.Ingreso } : Enum.GetValues<TipoFoto>())
+            {
+                var fotos = Model.Fotos(tipo).ToList();
+                var puedeSubir = Model.EsMecanico && (tipo == TipoFoto.Revision
+                    ? estado == EstadoVehiculo.EnRevision
+                    : tipo == TipoFoto.Final && estado is EstadoVehiculo.EnRevision or EstadoVehiculo.RevisionFinalizada or EstadoVehiculo.Disponible);
+
+                <div class="fotos-grupo">
+                    <h4>@tipo.NombreVisible() (@fotos.Count)</h4>
+                    @if (fotos.Any())
+                    {
+                        <div class="fotos">
+                            @foreach (var f in fotos)
+                            {
+                                <partial name="_Foto" model="f" />
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="ayuda">No hay fotografías en esta etapa.</p>
+                    }
+
+                    @if (puedeSubir)
+                    {
+                        <form asp-controller="Revisiones" asp-action="SubirFotos" method="post" enctype="multipart/form-data" class="form-en-linea">
+                            <input type="hidden" name="VehiculoId" value="@v.Id" />
+                            <input type="hidden" name="Tipo" value="@tipo" />
+                            <input class="campo" type="file" name="Archivos" multiple required accept=".jpg,.jpeg,.png,.webp,image/*" aria-label="Fotografías @tipo.NombreVisible()" />
+                            <button type="submit" class="btn btn-secundario">@Iconos.Svg("camara") Agregar fotografías</button>
+                        </form>
+                    }
+                </div>
+            }
+        </section>
+    </div>
+
+    @* ───────────── Columna derecha ───────────── *@
+    <aside>
+        <section class="tarjeta">
+            <h2 style="margin-bottom:12px">Datos del vehículo</h2>
+            <dl class="datos">
+                <dt>Marca</dt><dd>@v.Marca</dd>
+                <dt>Modelo</dt><dd>@v.Modelo</dd>
+                <dt>Año</dt><dd>@v.Anio</dd>
+                <dt>Color</dt><dd>@v.Color</dd>
+                <dt>VIN</dt><dd class="mono">@v.Vin</dd>
+                <dt>Registrado</dt><dd>@Formato.FechaHora(v.FechaIngreso) por @v.RegistradoPorNombre</dd>
+                <dt>Detalles al ingreso</dt><dd>@(string.IsNullOrWhiteSpace(v.Detalles) ? "Ninguno" : v.Detalles)</dd>
+                @if (v.FechaUltimaEdicion.HasValue)
+                {
+                    <dt>Última edición</dt><dd>@Formato.FechaHora(v.FechaUltimaEdicion.Value) por @v.EditadoPorNombre</dd>
+                }
+            </dl>
+        </section>
+
+        @if (Model.EsAsistente || Model.EsDueno)
+        {
+            <section class="tarjeta">
+                <div class="tarjeta-titulo" style="margin-bottom:12px">
+                    <h2>Estado comercial</h2>
+                    <partial name="_EstadoBadge" model="estado" />
+                </div>
+                @if (Model.Venta != null && Model.ClienteVenta != null)
+                {
+                    var datosVenta = new DatosClienteParcial { Cliente = Model.ClienteVenta, Monto = Model.Venta.Monto, Fecha = Model.Venta.FechaVenta, EtiquetaFecha = "Fecha de venta" };
+                    <partial name="_DatosCliente" model="datosVenta" />
+                }
+                else if (Model.Apartado != null && Model.ClienteApartado != null)
+                {
+                    var datosApartado = new DatosClienteParcial { Cliente = Model.ClienteApartado, Anticipo = Model.Apartado.Anticipo, Fecha = Model.Apartado.FechaApartado, EtiquetaFecha = "Fecha de apartado", Observaciones = Model.Apartado.Observaciones };
+                    <partial name="_DatosCliente" model="datosApartado" />
+                }
+                else
+                {
+                    <p class="encabezado-sub">@(estado == EstadoVehiculo.Disponible ? "Disponible: aún no tiene apartado." : "Aún no está disponible para venta.")</p>
+                }
+            </section>
+        }
+    </aside>
+</div>
+
+@* ───────────── Modales ───────────── *@
+@if (Model.EsAsistente || Model.EsDueno)
+{
+    <dialog id="modal-documentacion" class="modal" aria-labelledby="titulo-doc">
+        <div class="modal-cuerpo">
+            <h2 id="titulo-doc">Documentación</h2>
+            <p class="modal-sub">@v.NombreCompleto · Estado operativo: @estado.NombreVisible()</p>
+            <partial name="_FormDocumentacion" model="Model.FormDocumentacion" view-data='Datos("md")' />
+        </div>
+    </dialog>
+}
+@if (Model.EsDueno && estado == EstadoVehiculo.Disponible)
+{
+    <dialog id="modal-apartado" class="modal" aria-labelledby="titulo-apartado">
+        <div class="modal-cuerpo">
+            <h2 id="titulo-apartado">Registrar apartado</h2>
+            <p class="modal-sub">@v.NombreCompleto · VIN @v.VinCorto</p>
+            <partial name="_FormApartado" model="Model.NuevoApartado" view-data='Datos("ma")' />
+        </div>
+    </dialog>
+}
+@if (Model.EsDueno && estado is EstadoVehiculo.Disponible or EstadoVehiculo.Apartado)
+{
+    <dialog id="modal-venta" class="modal" aria-labelledby="titulo-venta">
+        <div class="modal-cuerpo">
+            <h2 id="titulo-venta">Registrar venta</h2>
+            <p class="modal-sub">Confirma los datos antes de continuar.</p>
+            <partial name="_FormVenta" model="Model.NuevaVenta" view-data='Datos("mv")' />
+        </div>
+    </dialog>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
