@@ -193,7 +193,11 @@
                             <p class="encabezado-sub">El mecánico terminó la revisión. Revisa sus últimos apuntes y decide si el vehículo queda disponible para la venta.</p>
                             <partial name="_ResumenRevision" model="Model.Revision" />
                             <div class="acciones">
-                                <form asp-action="Autorizar" asp-route-id="@v.Id" method="post" data-confirmar="¿Autorizar que @v.NombreCompleto quede disponible para la venta?">
+                                <form asp-action="Autorizar" asp-route-id="@v.Id" method="post"
+                                      data-confirmar="@v.NombreCompleto pasará a Disponible para venta y ya se podrá apartar o vender."
+                                      data-confirmar-titulo="¿Autorizar la disponibilidad?"
+                                      data-confirmar-boton="Sí, autorizar"
+                                      data-confirmar-tipo="exito">
                                     <button type="submit" class="btn btn-exito">@Iconos.Svg("check") Autorizar: disponible para venta</button>
                                 </form>
                             </div>
@@ -380,7 +384,40 @@
     </aside>
 </div>
 
+@* ───────────── Eliminar vehículo (solo el dueño; un vendido no se elimina) ───────────── *@
+@if (Model.PuedeEliminar)
+{
+    <div class="zona-eliminar">
+        <button type="button" class="btn-enlace enlace-peligro" data-abrir-modal="modal-eliminar">Eliminar vehículo</button>
+        <p class="ayuda">El vehículo dejará de aparecer en el sistema. Su historial se conserva en la bitácora.</p>
+    </div>
+}
+
 @* ───────────── Modales ───────────── *@
+@if (Model.PuedeEliminar)
+{
+    <dialog id="modal-eliminar" class="modal modal-angosto" aria-labelledby="titulo-eliminar">
+        <div class="modal-cuerpo">
+            <h2 id="titulo-eliminar">Eliminar vehículo</h2>
+            <p class="modal-mensaje">¿Seguro que deseas eliminar este vehículo del sistema?</p>
+            <dl class="modal-datos">
+                <dt>Vehículo</dt><dd>@v.Marca @v.Modelo</dd>
+                <dt>Año</dt><dd>@v.Anio</dd>
+                <dt>VIN</dt><dd class="mono">@v.Vin</dd>
+                <dt>Estado actual</dt><dd>@estado.NombreVisible()</dd>
+            </dl>
+            @if (estado == EstadoVehiculo.Apartado)
+            {
+                <p class="ayuda" style="margin-bottom:8px">El vehículo está apartado: el apartado también se cancelará.</p>
+            }
+            <p class="texto-peligro">Esta acción no se puede deshacer.</p>
+            <form asp-action="Eliminar" asp-route-id="@v.Id" method="post" class="modal-acciones">
+                <button type="button" class="btn btn-secundario" data-cerrar-modal>Cancelar</button>
+                <button type="submit" class="btn btn-rojo">Sí, eliminar vehículo</button>
+            </form>
+        </div>
+    </dialog>
+}
 @if (Model.EsAsistente || Model.EsDueno)
 {
     <dialog id="modal-documentacion" class="modal" aria-labelledby="titulo-doc">

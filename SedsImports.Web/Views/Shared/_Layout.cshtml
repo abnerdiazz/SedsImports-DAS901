@@ -96,6 +96,18 @@
         </div>
     }
 
+    @* Ventana de confirmación del sistema. La usan los formularios con data-confirmar (ver site.js). *@
+    <dialog id="modal-confirmar" class="modal modal-angosto" aria-labelledby="confirmar-titulo">
+        <div class="modal-cuerpo">
+            <h2 id="confirmar-titulo">Confirmar acción</h2>
+            <p class="modal-mensaje" id="confirmar-mensaje"></p>
+            <div class="modal-acciones">
+                <button type="button" class="btn btn-secundario" data-cerrar-modal>Cancelar</button>
+                <button type="button" class="btn btn-primario" id="confirmar-aceptar">Confirmar</button>
+            </div>
+        </div>
+    </dialog>
+
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

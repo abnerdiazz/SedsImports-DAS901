@@ -44,6 +44,14 @@ namespace SedsImports.Web.Models
         public DateTime? FechaUltimaEdicion { get; set; }
         public string? EditadoPorNombre { get; set; }
 
+        /// <summary>
+        /// Eliminación lógica: el vehículo deja de mostrarse en el sistema,
+        /// pero sus datos y su historial se conservan.
+        /// </summary>
+        public bool Eliminado { get; set; }
+        public DateTime? FechaEliminacion { get; set; }
+        public string? EliminadoPorNombre { get; set; }
+
         /// <summary>Fotografías del vehículo en sus tres momentos (ingreso, revisión y finales).</summary>
         public List<Fotografia> Fotografias { get; set; } = new();
 

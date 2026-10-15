@@ -193,6 +193,7 @@ namespace SedsImports.Web.Services
         {
             var vehiculos = _vehiculos.ObtenerTodos().ToDictionary(v => v.Id);
             return _revisiones.ObtenerTodos()
+                .Where(r => vehiculos.ContainsKey(r.VehiculoId))   // sin vehículos eliminados
                 .SelectMany(r => r.Notas.Where(n => n.UsuarioId == usuarioId && !n.EsDelSistema)
                     .Select(n => new NotaResumen
                     {

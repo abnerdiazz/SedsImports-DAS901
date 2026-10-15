@@ -15,15 +15,17 @@ namespace SedsImports.Web.Services
         private readonly IVehiculoRepository _vehiculos;
         private readonly IDocumentacionRepository _documentos;
         private readonly IRevisionRepository _revisiones;
+        private readonly IApartadoRepository _apartados;
         private readonly IFotoService _fotos;
         private readonly IBitacoraService _bitacora;
 
         public VehiculoService(IVehiculoRepository vehiculos, IDocumentacionRepository documentos,
-            IRevisionRepository revisiones, IFotoService fotos, IBitacoraService bitacora)
+            IRevisionRepository revisiones, IApartadoRepository apartados, IFotoService fotos, IBitacoraService bitacora)
         {
             _vehiculos = vehiculos;
             _documentos = documentos;
             _revisiones = revisiones;
+            _apartados = apartados;
             _fotos = fotos;
             _bitacora = bitacora;
         }
@@ -76,6 +78,8 @@ namespace SedsImports.Web.Services
         }
 
         public Vehiculo? Obtener(int id) => _vehiculos.ObtenerPorId(id);
+
+        public Vehiculo? ObtenerParaHistorial(int id) => _vehiculos.ObtenerIncluyendoEliminados(id);
 
         public int RegistradosDesde(DateTime desde) => _vehiculos.ObtenerTodos().Count(v => v.FechaIngreso >= desde);
 
@@ -234,6 +238,45 @@ namespace SedsImports.Web.Services
                 "Autorizó disponibilidad · Pendiente de autorización → Disponible para venta");
 
             return ResultadoOperacion.Ok($"{vehiculo.NombreCompleto} quedó disponible para la venta.");
+        }
+
+        /// <summary>
+        /// Eliminación lógica (solo el dueño). El vehículo desaparece de listados, tableros y búsquedas,
+        /// pero sus datos y su historial se conservan. Un vehículo vendido no se elimina porque
+        /// forma parte del historial de ventas; si estaba apartado, el apartado se cancela.
+        /// </summary>
+        public ResultadoOperacion Eliminar(int vehiculoId, Usuario actor)
+        {
+            if (!Permisos.PuedeEliminarVehiculo(actor.Rol.Tipo))
+                return ResultadoOperacion.Error("Solo el dueño puede eliminar vehículos.");
+
+            var vehiculo = _vehiculos.ObtenerPorId(vehiculoId);
+            if (vehiculo == null) return ResultadoOperacion.Error("El vehículo no existe o ya fue eliminado.");
+
+            if (vehiculo.Estado == EstadoVehiculo.Vendido)
+                return ResultadoOperacion.Error("Un vehículo vendido forma parte del historial de ventas y no se puede eliminar.");
+
+            var estadoAnterior = vehiculo.Estado;
+
+            var apartado = _apartados.ObtenerActivoPorVehiculo(vehiculoId);
+            if (apartado != null)
+            {
+                apartado.Estado = EstadoApartado.Cancelado;
+                apartado.FechaCierre = DateTime.Now;
+                apartado.MotivoCancelacion = "El vehículo fue eliminado del sistema.";
+                _apartados.Actualizar(apartado);
+            }
+
+            vehiculo.FechaEliminacion = DateTime.Now;
+            vehiculo.EliminadoPorNombre = actor.NombreCompleto;
+            _vehiculos.Actualizar(vehiculo);
+            _vehiculos.Eliminar(vehiculoId);
+
+            _bitacora.Registrar(actor, vehiculo, TipoMovimiento.Eliminacion,
+                $"Eliminó el vehículo · VIN {vehiculo.Vin} · Estado al eliminarlo: {estadoAnterior.NombreVisible()}"
+                + (apartado != null ? " · Se canceló su apartado" : ""));
+
+            return ResultadoOperacion.Ok($"{vehiculo.NombreCompleto} se eliminó del sistema.");
         }
 
         /// <summary>Reglas comunes de registro y edición: año válido y VIN único (CU-01, flujo alterno).</summary>

@@ -13,12 +13,12 @@ namespace SedsImports.Web.Repositories
         protected readonly object Candado = new();
         private int _ultimoId;
 
-        public IReadOnlyList<T> ObtenerTodos()
+        public virtual IReadOnlyList<T> ObtenerTodos()
         {
             lock (Candado) return Datos.ToList();
         }
 
-        public T? ObtenerPorId(int id)
+        public virtual T? ObtenerPorId(int id)
         {
             lock (Candado) return Datos.FirstOrDefault(e => e.Id == id);
         }
@@ -43,7 +43,7 @@ namespace SedsImports.Web.Repositories
             }
         }
 
-        public bool Eliminar(int id)
+        public virtual bool Eliminar(int id)
         {
             lock (Candado) return Datos.RemoveAll(e => e.Id == id) > 0;
         }
@@ -59,15 +59,37 @@ namespace SedsImports.Web.Repositories
         }
     }
 
+    /// <summary>
+    /// Vehículos. La eliminación es lógica: los vehículos marcados como eliminados
+    /// no se devuelven en las consultas normales, pero se conservan en los datos.
+    /// </summary>
     public class VehiculoRepositoryMemoria : RepositorioMemoria<Vehiculo>, IVehiculoRepository
     {
         private int _ultimaFoto;
 
+        public override IReadOnlyList<Vehiculo> ObtenerTodos() => Buscar(v => !v.Eliminado);
+
+        public override Vehiculo? ObtenerPorId(int id) => BuscarUno(v => v.Id == id && !v.Eliminado);
+
+        public Vehiculo? ObtenerIncluyendoEliminados(int id) => BuscarUno(v => v.Id == id);
+
+        public override bool Eliminar(int id)
+        {
+            lock (Candado)
+            {
+                var vehiculo = Datos.FirstOrDefault(v => v.Id == id && !v.Eliminado);
+                if (vehiculo == null) return false;
+                vehiculo.Eliminado = true;
+                vehiculo.FechaEliminacion ??= DateTime.Now;
+                return true;
+            }
+        }
+
         public Vehiculo? ObtenerPorVin(string vin) =>
-            BuscarUno(v => string.Equals(v.Vin, vin.Trim(), StringComparison.OrdinalIgnoreCase));
+            BuscarUno(v => !v.Eliminado && string.Equals(v.Vin, vin.Trim(), StringComparison.OrdinalIgnoreCase));
 
         public IReadOnlyList<Vehiculo> ObtenerPorEstado(params EstadoVehiculo[] estados) =>
-            Buscar(v => estados.Contains(v.Estado));
+            Buscar(v => !v.Eliminado && estados.Contains(v.Estado));
 
         public int SiguienteIdFoto() => Interlocked.Increment(ref _ultimaFoto);
     }

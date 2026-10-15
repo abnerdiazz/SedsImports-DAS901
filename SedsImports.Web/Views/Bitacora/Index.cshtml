@@ -37,7 +37,13 @@
                     <tr>
                         <td data-label="Fecha y hora" style="white-space:nowrap">@Formato.FechaHora(m.Fecha)</td>
                         <td data-label="Usuario">@m.UsuarioNombre <span class="tenue">· @(m.RolTipo?.NombreCorto() ?? m.RolNombre)</span></td>
-                        <td data-label="Vehículo">@(m.VehiculoNombre ?? "—")</td>
+                        <td data-label="Vehículo">
+                            @(m.VehiculoNombre ?? "—")
+                            @if (m.VehiculoId.HasValue && Model.VehiculosEliminados.Contains(m.VehiculoId.Value))
+                            {
+                                <span class="badge badge-inactivo" title="Vehículo eliminado: solo se puede consultar su historial">Eliminado</span>
+                            }
+                        </td>
                         <td data-label="Acción">@m.Accion</td>
                         <td class="derecha" data-label="">
                             @if (m.VehiculoId.HasValue)

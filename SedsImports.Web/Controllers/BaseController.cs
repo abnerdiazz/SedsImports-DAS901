@@ -33,7 +33,8 @@ namespace SedsImports.Web.Controllers
         }
 
         /// <summary>Copia los errores del servicio al ModelState para que se vean junto a cada campo.</summary>
-        protected void AgregarErrores(ResultadoOperacion resultado)
+        /// <param name="prefijo">Prefijo de los campos cuando el formulario es parte de otro modelo (p. ej. "NuevoUsuario").</param>
+        protected void AgregarErrores(ResultadoOperacion resultado, string? prefijo = null)
         {
             if (resultado.ErroresCampo.Count == 0)
             {
@@ -42,7 +43,7 @@ namespace SedsImports.Web.Controllers
             }
 
             foreach (var error in resultado.ErroresCampo)
-                ModelState.AddModelError(error.Key, error.Value);
+                ModelState.AddModelError(string.IsNullOrEmpty(prefijo) ? error.Key : $"{prefijo}.{error.Key}", error.Value);
         }
 
         /// <summary>Primer mensaje de error del ModelState (para formularios dentro de la ficha).</summary>

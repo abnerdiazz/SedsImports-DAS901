@@ -39,6 +39,7 @@ namespace SedsImports.Web.Helpers
             TipoMovimiento.Documentacion => "punto-verde",
             TipoMovimiento.Autorizacion => "punto-amarillo",
             TipoMovimiento.Comercial => "punto-morado",
+            TipoMovimiento.Eliminacion => "punto-rojo",
             _ => "punto-gris"
         };
 

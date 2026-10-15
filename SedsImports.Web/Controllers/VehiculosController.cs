@@ -7,7 +7,7 @@ using SedsImports.Web.ViewModels;
 namespace SedsImports.Web.Controllers
 {
     /// <summary>
-    /// Vehículos: listado, ficha, registro, edición y autorización de disponibilidad.
+    /// Vehículos: listado, ficha, registro, edición, autorización de disponibilidad y eliminación.
     /// Usa rutas por atributo: /vehiculos, /vehiculos/registrar, /vehiculos/5, /vehiculos/5/editar...
     /// </summary>
     [Route("vehiculos")]
@@ -173,6 +173,19 @@ namespace SedsImports.Web.Controllers
         {
             MostrarResultado(_vehiculos.AutorizarDisponibilidad(id, UsuarioActual));
             return RedirectToAction(nameof(Detalle), new { id });
+        }
+
+        // POST /vehiculos/5/eliminar — eliminación lógica, solo el dueño
+        [HttpPost("{id:int}/eliminar")]
+        [PerfilRequerido(TipoRol.DuenoVendedor)]
+        public IActionResult Eliminar(int id)
+        {
+            var resultado = _vehiculos.Eliminar(id, UsuarioActual);
+            MostrarResultado(resultado);
+            // Si ya no existe (o ya estaba eliminado) se vuelve al listado, porque su ficha ya no se puede abrir.
+            return resultado.Exitoso || _vehiculos.Obtener(id) == null
+                ? RedirectToAction(nameof(Index))
+                : RedirectToAction(nameof(Detalle), new { id });
         }
 
         // ───────────────────────── Armado de la ficha ─────────────────────────
