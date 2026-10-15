@@ -265,6 +265,9 @@ namespace SedsImports.Web.ViewModels
     {
         public string? Busqueda { get; set; }
         public List<MovimientoBitacora> Movimientos { get; set; } = new();
+
+        /// <summary>Vehículos eliminados: en la bitácora se marcan y solo se pueden consultar.</summary>
+        public HashSet<int> VehiculosEliminados { get; set; } = new();
     }
 
     public class TrazabilidadViewModel
@@ -272,6 +275,9 @@ namespace SedsImports.Web.ViewModels
         public int VehiculoId { get; set; }
         public string Vehiculo { get; set; } = string.Empty;
         public string? Origen { get; set; }
+        public bool Eliminado { get; set; }
+        public DateTime? FechaEliminacion { get; set; }
+        public string? EliminadoPor { get; set; }
         public List<MovimientoBitacora> Movimientos { get; set; } = new();
     }
 
@@ -279,6 +285,66 @@ namespace SedsImports.Web.ViewModels
     {
         public int UsuarioActualId { get; set; }
         public List<Usuario> Usuarios { get; set; } = new();
+
+        /// <summary>Formulario del modal "Agregar usuario".</summary>
+        public NuevoUsuarioViewModel NuevoUsuario { get; set; } = new();
+
+        /// <summary>Opciones del campo Rol del modal.</summary>
+        public List<Rol> Roles { get; set; } = new();
+
+        /// <summary>Se activa cuando el alta tuvo errores, para volver a abrir el modal con los datos escritos.</summary>
+        public bool AbrirModalNuevo { get; set; }
+    }
+
+    /// <summary>
+    /// Alta de un usuario interno desde el modal "Agregar usuario".
+    /// El usuario de acceso (correo) no se escribe: se genera con nombre.apellido@sedimports.com.
+    /// </summary>
+    public class NuevoUsuarioViewModel : IValidatableObject
+    {
+        private const string SoloLetras = "^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' ]+$";
+
+        [Display(Name = "Nombre")]
+        [Required(ErrorMessage = "Ingresa el nombre.")]
+        [StringLength(40, MinimumLength = 2, ErrorMessage = "El nombre debe tener entre 2 y 40 caracteres.")]
+        [RegularExpression(SoloLetras, ErrorMessage = "El nombre solo admite letras y espacios.")]
+        public string Nombre { get; set; } = string.Empty;
+
+        [Display(Name = "Apellido")]
+        [Required(ErrorMessage = "Ingresa el apellido.")]
+        [StringLength(40, MinimumLength = 2, ErrorMessage = "El apellido debe tener entre 2 y 40 caracteres.")]
+        [RegularExpression(SoloLetras, ErrorMessage = "El apellido solo admite letras y espacios.")]
+        public string Apellido { get; set; } = string.Empty;
+
+        /// <summary>Solo se muestra. El servidor lo vuelve a generar al guardar.</summary>
+        [Display(Name = "Usuario (automático)")]
+        public string? Correo { get; set; }
+
+        [Display(Name = "Rol")]
+        [Required(ErrorMessage = "Selecciona el rol.")]
+        public TipoRol? Rol { get; set; }
+
+        [Display(Name = "Estado")]
+        public bool Activo { get; set; } = true;
+
+        [Display(Name = "Contraseña")]
+        [Required(ErrorMessage = "Ingresa una contraseña.")]
+        [StringLength(50, MinimumLength = 8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres.")]
+        [RegularExpression(@"^(?=.*[A-Za-z])(?=.*\d).+$", ErrorMessage = "La contraseña debe combinar letras y números.")]
+        [DataType(DataType.Password)]
+        public string Contrasena { get; set; } = string.Empty;
+
+        [Display(Name = "Confirmar contraseña")]
+        [Required(ErrorMessage = "Confirma la contraseña.")]
+        [Compare(nameof(Contrasena), ErrorMessage = "Las contraseñas no coinciden.")]
+        [DataType(DataType.Password)]
+        public string ConfirmarContrasena { get; set; } = string.Empty;
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (Rol.HasValue && !Enum.IsDefined(Rol.Value))
+                yield return new ValidationResult("Selecciona un rol válido.", new[] { nameof(Rol) });
+        }
     }
 
     /// <summary>Datos que muestra el parcial _DatosCliente (estado comercial de la ficha).</summary>

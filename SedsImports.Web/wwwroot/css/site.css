@@ -326,6 +326,7 @@ a.mini:hover { border-color: var(--borde-fuerte); box-shadow: var(--sombra); }
 .alerta-morado { background: var(--morado-fondo); color: #4c1d95; border-left: 4px solid var(--morado); }
 .alerta-aviso { background: #fff6e0; color: #7c4a03; border-left: 4px solid var(--amarillo); }
 .alerta-teal { background: var(--teal-fondo); color: #134e4a; border-left: 4px solid var(--teal); }
+.alerta-peligro { background: var(--rojo-fondo); color: #7f1d1d; border-left: 4px solid var(--rojo); }
 
 .datos dt { font-size: var(--texto-xs); color: var(--texto-tenue); margin-top: 10px; }
 .datos dt:first-child { margin-top: 0; }
@@ -369,6 +370,7 @@ a.mini:hover { border-color: var(--borde-fuerte); box-shadow: var(--sombra); }
 .punto { position: absolute; left: 0; top: 4px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--borde); }
 .punto-azul { background: var(--azul); } .punto-verde { background: #16a34a; } .punto-naranja { background: #d97706; }
 .punto-amarillo { background: var(--amarillo); } .punto-morado { background: #8b5cf6; } .punto-gris { background: #6b7280; }
+.punto-rojo { background: var(--rojo); }
 .tiempo-fecha { font-size: var(--texto-xs); color: var(--texto-tenue); }
 .tiempo-quien { font-size: var(--texto-sm); font-weight: 700; }
 .tiempo-que { font-size: var(--texto-sm); color: var(--texto-suave); }
@@ -396,6 +398,21 @@ a.mini:hover { border-color: var(--borde-fuerte); box-shadow: var(--sombra); }
 .modal-cuerpo { padding: 22px 24px; }
 .modal-cuerpo h2 { margin-bottom: 2px; }
 .modal-sub { color: var(--texto-suave); font-size: var(--texto-xs); margin-bottom: 16px; }
+.modal-ancho { width: min(600px, calc(100vw - 32px)); }
+.modal-angosto { width: min(440px, calc(100vw - 32px)); }
+.modal-acciones { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+.modal-mensaje { font-size: var(--texto-sm); color: var(--texto); margin-top: 6px; }
+.modal-datos { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 14px; background: var(--tarjeta-suave); border-radius: var(--radio-sm); padding: 12px 14px; margin: 14px 0 12px; font-size: var(--texto-sm); }
+.modal-datos dt { color: var(--texto-suave); }
+.modal-datos dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.texto-peligro { color: var(--rojo); font-weight: 600; font-size: var(--texto-sm); }
+
+/* Botón rojo para acciones que no se pueden deshacer, y enlace rojo de la ficha */
+.btn-rojo { background: var(--rojo); color: #fff; }
+.btn-rojo:hover { background: #991b1b; }
+.btn-enlace.enlace-peligro { color: var(--rojo); }
+.zona-eliminar { margin-top: 4px; padding: 16px 2px 4px; border-top: 1px solid var(--borde); }
+.zona-eliminar p { margin-top: 4px; }
 
 /* ---------- 17. Inicio de sesión ---------- */
 .login { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; }
@@ -406,11 +423,6 @@ a.mini:hover { border-color: var(--borde-fuerte); box-shadow: var(--sombra); }
 .login-panel { background: #fff; display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
 .login-form { width: 100%; max-width: 360px; }
 .login-form h1 { font-size: 1.5rem; }
-.credenciales { margin-top: 26px; font-size: var(--texto-xs); color: var(--texto-suave); }
-.credenciales summary { cursor: pointer; font-weight: 600; }
-.credenciales table { width: 100%; margin-top: 8px; border-collapse: collapse; }
-.credenciales td { padding: 4px 0; border-bottom: 1px solid #eef1f4; }
-.credenciales button { font-size: var(--texto-xs); }
 
 /* ---------- 18. Confirmación ---------- */
 .confirmacion { max-width: 520px; text-align: center; padding: 30px 24px; }

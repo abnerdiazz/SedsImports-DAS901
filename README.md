@@ -28,11 +28,13 @@ ASP.NET Core MVC (**.NET 10**), patrón MVC con capas de servicios y repositorio
 
 ### Pasos
 
-1. Descomprime el ZIP.
+1. Descomprime el ZIP o clona el repositorio.
 2. Abre **`SedsImports.sln`** con Visual Studio.
 3. Presiona **F5** (o *Ctrl + F5*). El navegador se abre en la pantalla de inicio de sesión.
    - La primera vez, Visual Studio puede preguntar si confías en el certificado HTTPS de desarrollo. Responde **Sí**.
    - Si no quieres usar HTTPS, elige el perfil **http** en el botón verde de ejecución.
+   - También se abre una ventana de consola con el servidor. Es normal y debe quedar abierta mientras usas el sistema.
+   - Si al presionar F5 solo aparece la consola y no se abre el navegador, falta la carga de trabajo **Desarrollo de ASP.NET y web**. Agrégala desde *Visual Studio Installer → Modificar*.
 
 Desde la terminal también funciona: `dotnet run --project SedsImports.Web`. Después abre <http://localhost:5180>.
 
@@ -40,7 +42,7 @@ Desde la terminal también funciona: `dotnet run --project SedsImports.Web`. Des
 
 ### Usuarios de prueba
 
-Todos usan la contraseña **`Seds2026`**. En la pantalla de inicio de sesión también hay un botón **"Usar"** que llena las credenciales.
+Todos usan la contraseña **`Seds2026`**. El dueño puede crear más usuarios desde **Usuarios → Agregar usuario**.
 
 | Usuario | Perfil |
 |---|---|
@@ -68,7 +70,9 @@ Todos usan la contraseña **`Seds2026`**. En la pantalla de inicio de sesión ta
 | Actualizar documentación (proceso paralelo) | | | ✔ | ✔ |
 | Disponibles, registrar y cancelar apartados | | | | ✔ |
 | Registrar venta | | | | ✔ |
-| Ventas, reportes, bitácora, trazabilidad y usuarios | | | | ✔ |
+| **Eliminar un vehículo** (eliminación lógica) | | | | ✔ |
+| Ventas, reportes, bitácora y trazabilidad | | | | ✔ |
+| **Usuarios: agregar, activar y desactivar** | | | | ✔ |
 
 Si alguien entra por URL a una sección que no le corresponde, el filtro `[PerfilRequerido]` lo envía a **Acceso denegado**.
 
@@ -93,6 +97,9 @@ Recién llegado → En revisión/preparación → Pendiente de autorización →
 - El reporte muestra los 12 meses del año; un período sin ventas aparece en cero (CU-08).
 - Toda acción queda en la **bitácora**, y cada vehículo tiene su **trazabilidad** cronológica.
 - Un usuario desactivado ya no puede iniciar sesión, y nadie puede desactivarse a sí mismo.
+- **Alta de usuarios:** el usuario de acceso se genera solo con `nombre.apellido@sedimports.com` (sin tildes ni ñ). Si ya existe, se le agrega un número (`lucia.mena2`). La contraseña debe tener al menos 8 caracteres y combinar letras y números. Solo se pueden crear usuarios de patio, mecánico y asistente: por decisión del dueño, él es el único dueño / vendedor y administrador del sistema.
+- **Eliminar vehículo:** solo el dueño, desde la ficha y con confirmación. Es una eliminación lógica: el vehículo desaparece de listados, tableros y búsquedas, pero sus datos y su trazabilidad se conservan, y la eliminación queda registrada en la bitácora con el VIN y el estado que tenía. En la bitácora del dueño, sus movimientos se marcan como **Eliminado** y su trazabilidad queda **solo para consulta**: ya no se puede abrir su ficha ni hacer ninguna acción con él. Un vehículo vendido no se elimina porque forma parte del historial de ventas; si estaba apartado, el apartado se cancela.
+- Las acciones importantes (autorizar, desactivar, eliminar) se confirman con ventanas propias del sistema, no con los avisos del navegador.
 
 ---
 
@@ -154,6 +161,6 @@ SedsImports.Web/
 
 ## 6. Notas del prototipo
 
-- El inicio de sesión usa usuario y contraseña, como en el prototipo de Figma.
+- El inicio de sesión usa usuario y contraseña, como en el prototipo de Figma. La pantalla no muestra credenciales; los usuarios de prueba están en la sección 1 de este README.
 - Iniciar la revisión, agregar anotaciones y subir fotografías se hace desde la ficha del vehículo. `Revisiones/Editar` es el formulario para finalizar la revisión (resumen y pendientes).
 - La Fase 2 no usa base de datos. Entity Framework Core se integra en la Fase 3, y la autenticación y autorización formales en la Fase 4.

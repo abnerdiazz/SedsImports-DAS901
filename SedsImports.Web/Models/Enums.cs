@@ -101,6 +101,9 @@ namespace SedsImports.Web.Models
         Comercial = 6,
 
         [Display(Name = "Usuarios")]
-        Usuario = 7
+        Usuario = 7,
+
+        [Display(Name = "Eliminación")]
+        Eliminacion = 8
     }
 }

@@ -116,22 +116,79 @@
         });
     });
 
-    // 6. Formularios que se envían solos (selects de filtros) y confirmaciones
+    // 6. Formularios que se envían solos (selects de filtros)
     document.addEventListener("change", function (e) {
         if (e.target.matches("[data-enviar-al-cambiar]")) e.target.form.submit();
     });
+
+    // 7. Confirmaciones con la ventana del sistema (en lugar del confirm() del navegador)
+    //    <form data-confirmar="Mensaje" data-confirmar-titulo="¿Título?" data-confirmar-boton="Sí, continuar"
+    //          data-confirmar-tipo="peligro | exito">
+    const clasesBoton = { peligro: "btn-rojo", exito: "btn-exito" };
+    let formularioPendiente = null;
+
     document.addEventListener("submit", function (e) {
-        const mensaje = e.target.dataset.confirmar;
-        if (mensaje && !window.confirm(mensaje)) e.preventDefault();
+        const form = e.target;
+        const modal = document.getElementById("modal-confirmar");
+        if (!form.dataset.confirmar || !modal) return;
+
+        if (form.dataset.confirmado === "1") {   // ya se confirmó: se deja enviar
+            delete form.dataset.confirmado;
+            return;
+        }
+
+        e.preventDefault();
+        formularioPendiente = form;
+        const aceptar = modal.querySelector("#confirmar-aceptar");
+        modal.querySelector("#confirmar-titulo").textContent = form.dataset.confirmarTitulo || "Confirmar acción";
+        modal.querySelector("#confirmar-mensaje").textContent = form.dataset.confirmar;
+        aceptar.textContent = form.dataset.confirmarBoton || "Confirmar";
+        aceptar.className = "btn " + (clasesBoton[form.dataset.confirmarTipo] || "btn-primario");
+        modal.showModal();
+        aceptar.focus();
     });
 
-    // 7. Login: llenar credenciales de prueba
     document.addEventListener("click", function (e) {
-        const boton = e.target.closest("[data-usuario-prueba]");
-        if (!boton) return;
-        const form = document.querySelector(".login-form form");
-        form.querySelector('[name="Correo"]').value = boton.dataset.usuarioPrueba;
-        form.querySelector('[name="Contrasena"]').value = boton.dataset.contrasena;
-        form.querySelector('[name="Contrasena"]').focus();
+        if (!e.target.closest("#confirmar-aceptar") || !formularioPendiente) return;
+        const form = formularioPendiente;
+        formularioPendiente = null;
+        document.getElementById("modal-confirmar").close();
+        form.dataset.confirmado = "1";
+        if (form.requestSubmit) form.requestSubmit(); else form.submit();
     });
+
+    // 8. Modales que se abren al cargar la página (p. ej. el alta de usuario cuando tuvo errores)
+    document.querySelectorAll("dialog[data-abrir-al-cargar]").forEach(function (modal) {
+        modal.showModal();
+    });
+
+    // 9. Alta de usuario: vista previa del usuario nombre.apellido@sedimports.com
+    //    El servidor lo vuelve a generar al guardar (y le agrega un número si ya existe).
+    const campoCorreo = document.querySelector("[data-correo-automatico]");
+    if (campoCorreo) {
+        const form = campoCorreo.form;
+        let espera = null;
+
+        const actualizarCorreo = function () {
+            const nombre = form.querySelector('[name="NuevoUsuario.Nombre"]').value.trim();
+            const apellido = form.querySelector('[name="NuevoUsuario.Apellido"]').value.trim();
+            if (!nombre || !apellido) { campoCorreo.value = ""; return; }
+
+            const url = campoCorreo.dataset.correoAutomatico +
+                "?nombre=" + encodeURIComponent(nombre) + "&apellido=" + encodeURIComponent(apellido);
+            fetch(url, { headers: { "Accept": "application/json" } })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (datos) { if (datos) campoCorreo.value = datos.correo; })
+                .catch(function () { /* si falla, el servidor lo genera igual al guardar */ });
+        };
+
+        form.addEventListener("input", function (e) {
+            if (!e.target.matches("[data-generar-correo]")) return;
+            clearTimeout(espera);
+            espera = setTimeout(actualizarCorreo, 250);
+        });
+        form.addEventListener("reset", function () {
+            setTimeout(function () { campoCorreo.value = ""; }, 0);
+        });
+    }
 })();

@@ -122,6 +122,9 @@ namespace SedsImports.Web.ViewModels
 
         public bool PuedeEditar => (EsPatio || EsDueno) && Vehiculo.Estado != EstadoVehiculo.Vendido;
 
+        /// <summary>Solo el dueño elimina, y nunca un vehículo vendido (es parte del historial de ventas).</summary>
+        public bool PuedeEliminar => EsDueno && Vehiculo.Estado != EstadoVehiculo.Vendido;
+
         public IEnumerable<Fotografia> Fotos(TipoFoto tipo) => Vehiculo.Fotografias.Where(f => f.Tipo == tipo);
     }
 

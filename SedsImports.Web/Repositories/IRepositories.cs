@@ -21,6 +21,9 @@ namespace SedsImports.Web.Repositories
         Vehiculo? ObtenerPorVin(string vin);
         IReadOnlyList<Vehiculo> ObtenerPorEstado(params EstadoVehiculo[] estados);
         int SiguienteIdFoto();
+
+        /// <summary>Busca el vehículo aunque esté eliminado (solo para consultar su historial).</summary>
+        Vehiculo? ObtenerIncluyendoEliminados(int id);
     }
 
     public interface IRevisionRepository : IRepositorio<Revision>

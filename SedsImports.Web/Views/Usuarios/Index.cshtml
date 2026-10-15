@@ -2,12 +2,17 @@
 @{
     ViewData["Title"] = "Usuarios";
     ViewData["Menu"] = "usuarios";
+    var nuevo = Model.NuevoUsuario;
 }
 
 <div class="encabezado">
     <div>
         <h1>Usuarios</h1>
         <p class="encabezado-sub">Administración de usuarios internos. Un usuario desactivado ya no puede iniciar sesión.</p>
+    </div>
+    <div class="encabezado-acciones">
+        <button type="button" class="btn btn-secundario" data-abrir-modal="modal-nuevo-usuario" data-reiniciar
+                data-valores='{"NuevoUsuario.Activo":"true"}'>+ Agregar usuario</button>
     </div>
 </div>
 
@@ -36,11 +41,23 @@
                             {
                                 <span class="tenue">Tu usuario</span>
                             }
+                            else if (u.Activo)
+                            {
+                                <form asp-action="CambiarEstado" asp-route-id="@u.Id" method="post"
+                                      data-confirmar="@u.NombreCompleto ya no podrá iniciar sesión hasta que vuelvas a activar su usuario."
+                                      data-confirmar-titulo="¿Desactivar a @u.NombreCompleto?"
+                                      data-confirmar-boton="Sí, desactivar"
+                                      data-confirmar-tipo="peligro">
+                                    <button type="submit" class="btn-enlace enlace-peligro">Desactivar</button>
+                                </form>
+                            }
                             else
                             {
                                 <form asp-action="CambiarEstado" asp-route-id="@u.Id" method="post"
-                                      data-confirmar="¿@(u.Activo ? "Desactivar" : "Activar") a @u.NombreCompleto?">
-                                    <button type="submit" class="btn-enlace" style="@(u.Activo ? "color:var(--rojo)" : "")">@(u.Activo ? "Desactivar" : "Activar")</button>
+                                      data-confirmar="@u.NombreCompleto podrá volver a iniciar sesión con su usuario y contraseña."
+                                      data-confirmar-titulo="¿Activar a @u.NombreCompleto?"
+                                      data-confirmar-boton="Sí, activar">
+                                    <button type="submit" class="btn-enlace">Activar</button>
                                 </form>
                             }
                         </td>
@@ -50,3 +67,84 @@
         </table>
     </div>
 </section>
+
+@* ───────────── Modal: Agregar usuario ───────────── *@
+<dialog id="modal-nuevo-usuario" class="modal modal-ancho" aria-labelledby="titulo-nuevo-usuario" @(Model.AbrirModalNuevo ? "data-abrir-al-cargar" : "")>
+    <div class="modal-cuerpo">
+        <h2 id="titulo-nuevo-usuario">Agregar usuario</h2>
+        <p class="modal-sub">Crea una cuenta interna. El usuario se genera desde nombre y apellido.</p>
+
+        <form asp-action="Crear" method="post" autocomplete="off">
+            <div asp-validation-summary="ModelOnly"></div>
+
+            <div class="fila-campos">
+                <div class="grupo">
+                    <label class="etiqueta" asp-for="NuevoUsuario.Nombre">@Html.DisplayNameFor(m => m.NuevoUsuario.Nombre) <span class="req">*</span></label>
+                    <input class="campo" asp-for="NuevoUsuario.Nombre" placeholder="Ej.: Lucía" data-generar-correo />
+                    <span asp-validation-for="NuevoUsuario.Nombre"></span>
+                </div>
+                <div class="grupo">
+                    <label class="etiqueta" asp-for="NuevoUsuario.Apellido">@Html.DisplayNameFor(m => m.NuevoUsuario.Apellido) <span class="req">*</span></label>
+                    <input class="campo" asp-for="NuevoUsuario.Apellido" placeholder="Ej.: Mena" data-generar-correo />
+                    <span asp-validation-for="NuevoUsuario.Apellido"></span>
+                </div>
+            </div>
+
+            <div class="grupo">
+                <label class="etiqueta" asp-for="NuevoUsuario.Correo"></label>
+                <input class="campo" asp-for="NuevoUsuario.Correo" readonly tabindex="-1" placeholder="nombre.apellido@sedimports.com"
+                       data-correo-automatico="@Url.Action("CorreoSugerido")" />
+                <p class="ayuda">El correo se crea automáticamente con nombre.apellido@@sedimports.com</p>
+            </div>
+
+            <div class="fila-campos">
+                <div class="grupo">
+                    <label class="etiqueta" asp-for="NuevoUsuario.Rol">@Html.DisplayNameFor(m => m.NuevoUsuario.Rol) <span class="req">*</span></label>
+                    <select class="campo" asp-for="NuevoUsuario.Rol" asp-items="@(new SelectList(Model.Roles, nameof(Rol.Tipo), nameof(Rol.Nombre)))">
+                        <option value="">Seleccionar rol</option>
+                    </select>
+                    <span asp-validation-for="NuevoUsuario.Rol"></span>
+                    <p class="ayuda">El dueño / vendedor es el único administrador del sistema.</p>
+                </div>
+                <div class="grupo">
+                    <label class="etiqueta" for="NuevoUsuario_Activo">@Html.DisplayNameFor(m => m.NuevoUsuario.Activo)</label>
+                    <select class="campo" id="NuevoUsuario_Activo" name="NuevoUsuario.Activo">
+                        @if (nuevo.Activo)
+                        {
+                            <option value="true" selected>Activo</option>
+                            <option value="false">Inactivo</option>
+                        }
+                        else
+                        {
+                            <option value="true">Activo</option>
+                            <option value="false" selected>Inactivo</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="fila-campos">
+                <div class="grupo">
+                    <label class="etiqueta" asp-for="NuevoUsuario.Contrasena">@Html.DisplayNameFor(m => m.NuevoUsuario.Contrasena) <span class="req">*</span></label>
+                    <input class="campo" asp-for="NuevoUsuario.Contrasena" placeholder="••••••••" autocomplete="new-password" />
+                    <span asp-validation-for="NuevoUsuario.Contrasena"></span>
+                </div>
+                <div class="grupo">
+                    <label class="etiqueta" asp-for="NuevoUsuario.ConfirmarContrasena">@Html.DisplayNameFor(m => m.NuevoUsuario.ConfirmarContrasena) <span class="req">*</span></label>
+                    <input class="campo" asp-for="NuevoUsuario.ConfirmarContrasena" placeholder="••••••••" autocomplete="new-password" />
+                    <span asp-validation-for="NuevoUsuario.ConfirmarContrasena"></span>
+                </div>
+            </div>
+            <p class="ayuda" style="margin-top:-4px">Mínimo 8 caracteres, combinando letras y números.</p>
+
+            <div class="modal-acciones">
+                <button type="button" class="btn btn-secundario" data-cerrar-modal>Cancelar</button>
+                <button type="submit" class="btn btn-primario">Crear usuario</button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

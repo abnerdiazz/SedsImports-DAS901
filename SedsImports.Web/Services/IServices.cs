@@ -17,6 +17,10 @@ namespace SedsImports.Web.Services
         Task<ResultadoOperacion<Vehiculo>> RegistrarAsync(VehiculoFormViewModel modelo, Usuario actor);
         Task<ResultadoOperacion> EditarAsync(VehiculoFormViewModel modelo, Usuario actor);
         ResultadoOperacion AutorizarDisponibilidad(int vehiculoId, Usuario actor);
+        ResultadoOperacion Eliminar(int vehiculoId, Usuario actor);
+
+        /// <summary>Devuelve el vehículo aunque haya sido eliminado (para consultar su trazabilidad).</summary>
+        Vehiculo? ObtenerParaHistorial(int id);
     }
 
     public interface IFotoService
@@ -82,6 +86,13 @@ namespace SedsImports.Web.Services
         List<Usuario> Listar();
         Usuario? Obtener(int id);
         ResultadoOperacion CambiarEstado(int usuarioId, Usuario actor);
+        ResultadoOperacion<Usuario> Crear(NuevoUsuarioViewModel modelo, Usuario actor);
+
+        /// <summary>Roles disponibles para usuarios nuevos (todos menos el dueño / vendedor).</summary>
+        List<Rol> Roles();
+
+        /// <summary>Genera el usuario de acceso nombre.apellido@sedimports.com sin repetir uno existente.</summary>
+        string GenerarCorreo(string? nombre, string? apellido);
     }
 
     /// <summary>Usuario que tiene la sesión abierta en la petición actual.</summary>
@@ -108,6 +119,7 @@ namespace SedsImports.Web.Services
         public static bool PuedeDocumentar(TipoRol rol) => rol is TipoRol.AsistenteAdministrativa or TipoRol.DuenoVendedor;
         public static bool PuedeGestionarComercial(TipoRol rol) => rol == TipoRol.DuenoVendedor;
         public static bool PuedeAdministrar(TipoRol rol) => rol == TipoRol.DuenoVendedor;
+        public static bool PuedeEliminarVehiculo(TipoRol rol) => rol == TipoRol.DuenoVendedor;
 
         /// <summary>El mecánico solo ve los vehículos que le toca trabajar o que ya preparó.</summary>
         public static EstadoVehiculo[] EstadosVisibles(TipoRol rol) => rol == TipoRol.Mecanico
