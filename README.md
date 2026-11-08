@@ -1,7 +1,7 @@
 # SED's Imports & Services — Sistema de gestión y seguimiento vehicular
 
-Prototipo web funcional de la **Fase 2 (Desarrollo Web y UX/UI)** de DAS901.
-ASP.NET Core MVC (**.NET 10**), patrón MVC con capas de servicios y repositorios, y datos en memoria. La base de datos se integra en la Fase 3.
+Sistema web de la **Fase 3 (Persistencia de Datos y Arquitectura Empresarial)** de DAS901.
+ASP.NET Core MVC (**.NET 10**) con arquitectura por capas (Domain, Application, Infrastructure y Web), **Entity Framework Core 10** y **SQL Server LocalDB**, patrón Repositorio y Unidad de Trabajo.
 
 ## Tecnologías
 
@@ -13,7 +13,9 @@ ASP.NET Core MVC (**.NET 10**), patrón MVC con capas de servicios y repositorio
 | **DataAnnotations + jQuery Validation Unobtrusive** | Validación en el servidor y en el navegador |
 | **HTML5, CSS3 y JavaScript** | Diseño responsive, menú para celular y ventanas modales |
 | **Sesión de ASP.NET Core** | Inicio de sesión por perfil (la seguridad formal llega en la Fase 4) |
-| **Repositorios en memoria** | Datos de prueba en la Fase 2. En la Fase 3 se reemplazan por Entity Framework Core y SQL Server |
+| **Entity Framework Core 10 (Code First)** | DbContext, Fluent API, migraciones, LINQ y datos iniciales |
+| **SQL Server Express LocalDB** | Base de datos `SedsImportsDB` |
+| **Repositorio + Unidad de Trabajo** | Acceso a datos desacoplado de la lógica del negocio |
 | **Figma** | Wireframes y mockups del prototipo |
 | **Git y GitHub** | Control de versiones con una rama por integrante y Pull Requests |
 
@@ -25,12 +27,15 @@ ASP.NET Core MVC (**.NET 10**), patrón MVC con capas de servicios y repositorio
 
 - **Visual Studio 2026**, o **Visual Studio 2022 versión 17.14 o superior**, con la carga de trabajo *Desarrollo de ASP.NET y web*.
 - **SDK de .NET 10**: <https://dotnet.microsoft.com/download/dotnet/10.0>
+- **SQL Server Express LocalDB** (componente individual de Visual Studio *SQL Server Express LocalDB*; viene marcado con la carga de trabajo de ASP.NET y web).
+- Opcional, para manejar migraciones desde la terminal: `dotnet tool install --global dotnet-ef --version 10.0.13`
 
 ### Pasos
 
 1. Descomprime el ZIP o clona el repositorio.
-2. Abre **`SedsImports.sln`** con Visual Studio.
+2. Abre **`SedsImports.sln`** con Visual Studio. Clic derecho sobre **SedsImports.Web → Establecer como proyecto de inicio** (si no lo está ya).
 3. Presiona **F5** (o *Ctrl + F5*). El navegador se abre en la pantalla de inicio de sesión.
+   - **La primera vez, la aplicación crea sola la base de datos `SedsImportsDB` en LocalDB** (aplica la migración `InitialCreate`) y carga los datos de ejemplo. Tarda unos segundos más que las siguientes veces.
    - La primera vez, Visual Studio puede preguntar si confías en el certificado HTTPS de desarrollo. Responde **Sí**.
    - Si no quieres usar HTTPS, elige el perfil **http** en el botón verde de ejecución.
    - También se abre una ventana de consola con el servidor. Es normal y debe quedar abierta mientras usas el sistema.
@@ -38,7 +43,16 @@ ASP.NET Core MVC (**.NET 10**), patrón MVC con capas de servicios y repositorio
 
 Desde la terminal también funciona: `dotnet run --project SedsImports.Web`. Después abre <http://localhost:5180>.
 
-> **¿Tienes solo .NET 8?** Cambia `<TargetFramework>net10.0</TargetFramework>` por `net8.0` en `SedsImports.Web/SedsImports.Web.csproj`. El código no usa nada exclusivo de .NET 10. Aun así, el equipo acordó trabajar con **net10.0**.
+### Base de datos
+
+- Cadena de conexión: `ConnectionStrings:SedsImportsDB` en `SedsImports.Web/appsettings.json`:
+  `Server=(localdb)\MSSQLLocalDB;Database=SedsImportsDB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True`
+- Para ver las tablas: **Ver → Explorador de objetos de SQL Server → (localdb)\MSSQLLocalDB → Bases de datos → SedsImportsDB**.
+- Crear o actualizar la base manualmente (opcional, la aplicación lo hace sola al iniciar):
+  `dotnet ef database update --project SedsImports.Infrastructure --startup-project SedsImports.Web`
+- Nueva migración después de cambiar una entidad:
+  `dotnet ef migrations add NombreDelCambio --project SedsImports.Infrastructure --startup-project SedsImports.Web --output-dir Datos/Migraciones`
+- **Volver a los datos de ejemplo:** borra la base (`dotnet ef database drop --project SedsImports.Infrastructure --startup-project SedsImports.Web`) y vuelve a ejecutar la aplicación.
 
 ### Usuarios de prueba
 
@@ -51,7 +65,7 @@ Todos usan la contraseña **`Seds2026`**. El dueño puede crear más usuarios de
 | dania.martinez@sedimports.com | Asistente administrativa |
 | ernesto.rivas@sedimports.com | Dueño / vendedor |
 
-> Los datos viven **en memoria**. Al detener la aplicación se reinician a los datos de ejemplo. Esto es intencional en la Fase 2; en la Fase 3 se reemplazan los repositorios por Entity Framework Core.
+> Los datos se guardan en **SQL Server**: lo que registres se conserva aunque detengas la aplicación.
 
 ---
 
@@ -103,27 +117,47 @@ Recién llegado → En revisión/preparación → Pendiente de autorización →
 
 ---
 
-## 4. Estructura del proyecto (MVC por capas)
+## 4. Arquitectura por capas (Clean Architecture)
 
 ```
 SedsImports.sln
-SedsImports.Web/
-├── Models/          Entidades del dominio (Vehiculo, Revision, Documentacion, Cliente, Apartado, Venta, Rol, Usuario, MovimientoBitacora, Enums)
-├── DTOs/            Objetos planos para listados y reportes
-├── ViewModels/      Datos que viajan entre controlador y vista, con validaciones (DataAnnotations)
-├── Repositories/    Interfaces de acceso a datos + implementación en memoria
-├── Data/            Datos iniciales de ejemplo
-├── Services/        Lógica y reglas del negocio (una interfaz por responsabilidad)
-├── Filters/         [PerfilRequerido]: control de acceso por perfil
-├── Helpers/         Nombres visibles de enums, formatos, íconos SVG, hash
-├── Controllers/     Acciones, Action Results, rutas y navegación
-├── Views/           Razor: layout, vistas por módulo y vistas parciales
-├── wwwroot/         CSS (manual de estilos), JS, librerías de validación, fotos subidas
-└── Program.cs       Inyección de dependencias, sesión, cultura es-SV y rutas
+├── SedsImports.Domain/           Núcleo: no depende de nada
+│   ├── Entidades/                Vehiculo, Fotografia, Revision, NotaRevision, Documentacion, Cliente, Apartado, Venta, Rol, Usuario, MovimientoBitacora
+│   ├── Enums/                    Estados y tipos
+│   ├── Interfaces/               IRepositorio<T>, un repositorio por entidad e IUnidadDeTrabajo
+│   ├── Consultas/                Resultados de consultas LINQ (records)
+│   ├── Excepciones/              ErrorPersistenciaException
+│   └── Extensiones/              Nombres visibles de los enums
+├── SedsImports.Application/      Reglas del negocio → depende de Domain
+│   ├── Servicios/                VehiculoService, RevisionService, ... (heredan de ServicioBase)
+│   ├── Interfaces/               IVehiculoService, IRevisionService, ...
+│   ├── DTOs/  ViewModels/        Datos de salida y de entrada
+│   └── Comun/                    ResultadoOperacion, Permisos, Formato, Seguridad
+├── SedsImports.Infrastructure/   Acceso a datos con EF Core → depende de Domain
+│   ├── Datos/                    SedsImportsDbContext, Configuraciones (Fluent API), Migraciones, DatosIniciales
+│   ├── Repositorios/             RepositorioBase<T>, repositorios con LINQ y UnidadDeTrabajo
+│   └── DependencyInjection.cs    AgregarInfraestructura()
+└── SedsImports.Web/              Presentación MVC → depende de Application e Infrastructure
+    ├── Controllers/ Views/ Filters/ Helpers/ Servicios/ wwwroot/
+    └── Program.cs                Inyección de dependencias e inicialización de la base de datos
 ```
 
-**Recorrido de una petición** (por ejemplo, al registrar un vehículo):
-`Vista Create` → `VehiculosController.Create (POST)` → `IVehiculoService.RegistrarAsync` → `IVehiculoRepository.Agregar` → `IBitacoraService.Registrar` → `RedirectToAction("Registrado")`.
+**Recorrido de una petición** (registrar un vehículo):
+`Vista Create` → `VehiculosController.Create (POST)` → `IVehiculoService.RegistrarAsync` → `IVehiculoRepository.Agregar` + `IBitacoraService.Registrar` → `IUnidadDeTrabajo.GuardarCambios()` (un solo `SaveChanges` dentro de una transacción) → `RedirectToAction("Registrado")`.
+
+### Persistencia (Fase 3)
+
+| Tema | Dónde está |
+|---|---|
+| DbContext y DbSet | `Infrastructure/Datos/SedsImportsDbContext.cs` |
+| Fluent API (llaves, longitudes, índices únicos, relaciones 1-1 y 1-N, restricciones CHECK) | `Infrastructure/Datos/Configuraciones/*Configuracion.cs` |
+| Eliminación lógica | Filtro global `HasQueryFilter(v => !v.Eliminado)` e índice único del VIN filtrado |
+| Migraciones | `Infrastructure/Datos/Migraciones/` (`InitialCreate`) |
+| Datos iniciales | `Infrastructure/Datos/DatosIniciales.cs` (se cargan si la base está vacía) |
+| LINQ: filtros, ordenamiento, agrupaciones, joins | `VehiculoRepository.Buscar` / `ContarPorEstado`, `VentaRepository.ResumenMensual` / `ResumenPorMarca`, `RevisionRepository.NotasRecientes`, `BitacoraRepository.Buscar` |
+| Repositorio genérico + específicos | `Infrastructure/Repositorios/` (interfaces en `Domain/Interfaces/`) |
+| Unidad de Trabajo y transacciones | `UnidadDeTrabajo.cs`; `VehiculoService.RegistrarAsync` usa una transacción explícita |
+| Manejo de errores | `ErrorPersistenciaException` → `ServicioBase.Guardar` → mensaje al usuario; filtro global `ErrorPersistenciaFilter` |
 
 ### Dónde se ve cada subpunto de la actividad
 
@@ -131,14 +165,14 @@ SedsImports.Web/
 |---|---|
 | 4.2 Model Binding | Todos los POST reciben ViewModels (`VehiculosController.Create(VehiculoFormViewModel)`). `Ventas/Reporte` hace binding desde el *query string*. |
 | 4.3 Validación | `[Required]`, `[Range]`, `[StringLength]`, `[RegularExpression]`, `IValidatableObject` (`DocumentacionViewModel`, `FinalizarRevisionViewModel`) y reglas del servicio (VIN duplicado). Funciona en el navegador y en el servidor. |
-| 4.5 DTOs | `DTOs/Dtos.cs`: `VehiculoListadoDto`, `ReporteVentasDto`, `VentaMensualDto`, etc. |
+| 4.5 DTOs | `Application/DTOs/Dtos.cs`: `VehiculoListadoDto`, `ReporteVentasDto`, `VentaMensualDto`, etc. |
 | 5.3 Secciones | `@RenderSectionAsync("Scripts")` en `_Layout`; `@section Scripts { ... }` en los formularios. |
 | 5.4 HTML Helpers | `Ventas/Reporte` (`Html.DropDownListFor`, `Html.TextBoxFor`, `Html.LabelFor`) y `Html.DisplayNameFor` en los formularios. |
 | 5.5 Tag Helpers | `asp-for`, `asp-action`, `asp-route-*`, `asp-validation-for`, `asp-items`, `<partial>`. |
 | 5.6 Vistas parciales | `_Mensajes`, `_EstadoBadge`, `_VehiculoFila`, `_DatosCliente`, `_Pasos`, `_Foto`, `_FormApartado`, `_FormVenta`, `_FormDocumentacion`, `Home/_Inicio*`. |
 | 6.2 Action Results | `View`, `RedirectToAction`, `Redirect`, `LocalRedirect`, `NotFound`. |
 | 6.3 Rutas | Ruta convencional en `Program.cs` y rutas por atributo en `VehiculosController` (`/vehiculos/5/editar`). |
-| 6.5 Inyección de dependencias | `Program.cs`: repositorios como Singleton, servicios como Scoped, todo por interfaz. |
+| 6.5 Inyección de dependencias | `Program.cs` + `AgregarInfraestructura()`: DbContext, repositorios, Unidad de Trabajo y servicios como Scoped, todo por interfaz. |
 | 3.5 Responsive | Menú lateral que se convierte en menú hamburguesa; las tablas se vuelven tarjetas en el celular. |
 
 ---
@@ -157,10 +191,10 @@ SedsImports.Web/
 - `main` contiene la versión estable del proyecto.
 - Cada integrante trabaja en su propia rama (`feature/...`) y hace sus propios commits con mensajes descriptivos.
 - Al terminar su parte, cada integrante abre un Pull Request hacia `main`, que se revisa antes de fusionarse.
-- El trabajo se reparte por capas del patrón MVC: modelos y datos, servicios y controladores, vistas, y diseño UX/UI.
+- Fase 3: el trabajo se reparte por capas: dominio (Elías), Entity Framework y base de datos (Marlene), repositorios y LINQ (Jason), servicios e integración web (Abner).
 
-## 6. Notas del prototipo
+## 6. Notas
 
 - El inicio de sesión usa usuario y contraseña, como en el prototipo de Figma. La pantalla no muestra credenciales; los usuarios de prueba están en la sección 1 de este README.
 - Iniciar la revisión, agregar anotaciones y subir fotografías se hace desde la ficha del vehículo. `Revisiones/Editar` es el formulario para finalizar la revisión (resumen y pendientes).
-- La Fase 2 no usa base de datos. Entity Framework Core se integra en la Fase 3, y la autenticación y autorización formales en la Fase 4.
+- La autenticación y autorización formales (ASP.NET Core Identity) se implementan en la Fase 4. Por ahora las contraseñas se guardan con hash SHA-256.
