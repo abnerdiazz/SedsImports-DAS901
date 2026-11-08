@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
+  <!-- Capa de presentación: controladores, vistas Razor y archivos estáticos (ASP.NET Core MVC). -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -7,5 +8,18 @@
     <RootNamespace>SedsImports.Web</RootNamespace>
     <AssemblyName>SedsImports.Web</AssemblyName>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Necesario para ejecutar Add-Migration / dotnet ef con la Web como proyecto de inicio. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.13">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SedsImports.Application\SedsImports.Application.csproj" />
+    <ProjectReference Include="..\SedsImports.Infrastructure\SedsImports.Infrastructure.csproj" />
+  </ItemGroup>
 
 </Project>
