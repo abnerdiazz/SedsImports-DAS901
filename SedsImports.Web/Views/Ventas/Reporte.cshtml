@@ -99,3 +99,33 @@
         <p class="vacio">No hay ventas registradas en el período seleccionado (0 unidades).</p>
     }
 </section>
+
+@* Consulta LINQ avanzada (agrupación por marca con promedio de días en el patio). *@
+<section class="tarjeta">
+    <h2>Resumen por marca · @Model.Anio</h2>
+    <p class="tarjeta-sub">Unidades y monto vendido por marca, y cuántos días en promedio pasó cada vehículo en el patio antes de venderse.</p>
+
+    @if (Model.Resultado.PorMarca.Any())
+    {
+        <div class="tabla-contenedor">
+            <table class="tabla tabla-responsive">
+                <thead><tr><th>Marca</th><th class="derecha">Unidades</th><th class="derecha">Monto total</th><th class="derecha">Días promedio en patio</th></tr></thead>
+                <tbody>
+                    @foreach (var m in Model.Resultado.PorMarca)
+                    {
+                        <tr>
+                            <td class="fuerte" data-label="Marca">@m.Marca</td>
+                            <td class="derecha" data-label="Unidades">@m.Cantidad</td>
+                            <td class="derecha" data-label="Monto total">@Formato.Dinero(m.Total)</td>
+                            <td class="derecha" data-label="Días promedio en patio">@m.PromedioDiasEnPatio.ToString("0.#")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <p class="vacio">No hay ventas registradas en @Model.Anio.</p>
+    }
+</section>
