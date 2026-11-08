@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using SedsImports.Application.Comun;
+using SedsImports.Application.Interfaces;
+using SedsImports.Application.ViewModels;
+using SedsImports.Domain.Entidades;
+using SedsImports.Domain.Enums;
 using SedsImports.Web.Filters;
-using SedsImports.Web.Models;
-using SedsImports.Web.Services;
-using SedsImports.Web.ViewModels;
 
 namespace SedsImports.Web.Controllers
 {
@@ -199,7 +201,7 @@ namespace SedsImports.Web.Controllers
             var clienteApartado = apartado != null ? _clientes.Obtener(apartado.ClienteId) : null;
             var clienteVenta = venta != null ? _clientes.Obtener(venta.ClienteId) : null;
 
-            var (accion, responsable) = VehiculoService.SiguienteAccion(vehiculo.Estado);
+            var (accion, responsable) = FlujoVehiculo.SiguienteAccion(vehiculo.Estado);
 
             var modelo = new VehiculoDetalleViewModel
             {

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using SedsImports.Web.Services;
-using SedsImports.Web.ViewModels;
+using SedsImports.Application.Comun;
+using SedsImports.Application.Interfaces;
+using SedsImports.Application.ViewModels;
 
 namespace SedsImports.Web.Controllers
 {

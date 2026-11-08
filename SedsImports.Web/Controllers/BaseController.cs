@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using SedsImports.Web.Models;
-using SedsImports.Web.Services;
+using SedsImports.Application.Comun;
+using SedsImports.Application.Interfaces;
+using SedsImports.Domain.Entidades;
+using SedsImports.Domain.Enums;
 
 namespace SedsImports.Web.Controllers
 {

@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using SedsImports.Application.Comun;
+using SedsImports.Application.Interfaces;
+using SedsImports.Application.ViewModels;
+using SedsImports.Domain.Entidades;
+using SedsImports.Domain.Enums;
 using SedsImports.Web.Filters;
-using SedsImports.Web.Models;
-using SedsImports.Web.Services;
-using SedsImports.Web.ViewModels;
 
 namespace SedsImports.Web.Controllers
 {
@@ -24,11 +26,8 @@ namespace SedsImports.Web.Controllers
         {
             Busqueda = busqueda,
             Movimientos = _bitacora.Listar(busqueda),
-            // Se toman de toda la bitácora (no solo de la búsqueda) para marcar bien cada fila.
-            VehiculosEliminados = _bitacora.Listar(null)
-                .Where(m => m.Tipo == TipoMovimiento.Eliminacion && m.VehiculoId.HasValue)
-                .Select(m => m.VehiculoId!.Value)
-                .ToHashSet()
+            // Vehículos eliminados lógicamente: sus filas se marcan como "solo historial".
+            VehiculosEliminados = _vehiculos.IdsEliminados()
         });
 
         // GET /Bitacora/Trazabilidad/5?origen=ventas — el botón "Volver" regresa a la pantalla de origen
