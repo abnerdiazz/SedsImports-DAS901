@@ -1,7 +1,9 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using SedsImports.Web.Models;
-using SedsImports.Web.Services;
+using Microsoft.AspNetCore.Mvc;
+using SedsImports.Application.Comun;
+using SedsImports.Application.Interfaces;
+using SedsImports.Domain.Entidades;
+using SedsImports.Domain.Enums;
 
 namespace SedsImports.Web.Filters
 {

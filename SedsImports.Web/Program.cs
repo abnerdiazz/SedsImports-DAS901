@@ -1,9 +1,12 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
-using SedsImports.Web.Data;
-using SedsImports.Web.Repositories;
-using SedsImports.Web.Services;
+using SedsImports.Application.Interfaces;
+using SedsImports.Application.Servicios;
+using SedsImports.Infrastructure;
+using SedsImports.Infrastructure.Datos;
+using SedsImports.Web.Filters;
+using SedsImports.Web.Servicios;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +15,9 @@ builder.Services.AddControllersWithViews(opciones =>
 {
     // Protección CSRF en todos los formularios POST (los Tag Helpers agregan el token automáticamente).
     opciones.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+
+    // Errores de base de datos: mensaje claro al usuario en lugar de una pantalla de error.
+    opciones.Filters.Add<ErrorPersistenciaFilter>();
 });
 
 // Sesión: guarda el usuario que inició sesión (la autenticación formal llega en la Fase 4).
@@ -26,19 +32,12 @@ builder.Services.AddSession(opciones =>
 builder.Services.AddHttpContextAccessor();
 
 // ───────────────────────── Inyección de dependencias ─────────────────────────
-// Repositorios en memoria: Singleton para que los datos vivan mientras corre la aplicación.
-// En la Fase 3 se cambian por repositorios con Entity Framework Core (Scoped) sin tocar lo demás.
-builder.Services.AddSingleton<IRolRepository, RolRepositoryMemoria>();
-builder.Services.AddSingleton<IUsuarioRepository, UsuarioRepositoryMemoria>();
-builder.Services.AddSingleton<IVehiculoRepository, VehiculoRepositoryMemoria>();
-builder.Services.AddSingleton<IRevisionRepository, RevisionRepositoryMemoria>();
-builder.Services.AddSingleton<IDocumentacionRepository, DocumentacionRepositoryMemoria>();
-builder.Services.AddSingleton<IClienteRepository, ClienteRepositoryMemoria>();
-builder.Services.AddSingleton<IApartadoRepository, ApartadoRepositoryMemoria>();
-builder.Services.AddSingleton<IVentaRepository, VentaRepositoryMemoria>();
-builder.Services.AddSingleton<IBitacoraRepository, BitacoraRepositoryMemoria>();
+// Capa de infraestructura: DbContext (SQL Server), repositorios y Unidad de Trabajo (Scoped).
+var cadenaConexion = builder.Configuration.GetConnectionString("SedsImportsDB")
+    ?? throw new InvalidOperationException("Falta la cadena de conexión 'SedsImportsDB' en appsettings.json.");
+builder.Services.AgregarInfraestructura(cadenaConexion);
 
-// Servicios de negocio: Scoped (una instancia por petición).
+// Capa de aplicación: servicios de negocio (Scoped, una instancia por petición).
 builder.Services.AddScoped<IBitacoraService, BitacoraService>();
 builder.Services.AddScoped<IFotoService, FotoService>();
 builder.Services.AddScoped<IVehiculoService, VehiculoService>();
@@ -48,12 +47,14 @@ builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IApartadoService, ApartadoService>();
 builder.Services.AddScoped<IVentaService, VentaService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+
+// Capa web: usuario de la sesión.
 builder.Services.AddScoped<IUsuarioActualService, UsuarioActualService>();
 
 var app = builder.Build();
 
-// Datos de ejemplo del prototipo.
-DatosIniciales.Cargar(app.Services);
+// Crea o actualiza la base de datos (migraciones) y carga los datos iniciales si está vacía.
+InicializadorBaseDatos.Inicializar(app.Services);
 
 // Cultura de El Salvador para fechas y números.
 var cultura = new CultureInfo("es-SV");
