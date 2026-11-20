@@ -1,8 +1,8 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
+using SedsImports.Application;
 using SedsImports.Application.Interfaces;
-using SedsImports.Application.Servicios;
 using SedsImports.Infrastructure;
 using SedsImports.Infrastructure.Datos;
 using SedsImports.Web.Filters;
@@ -37,16 +37,9 @@ var cadenaConexion = builder.Configuration.GetConnectionString("SedsImportsDB")
     ?? throw new InvalidOperationException("Falta la cadena de conexión 'SedsImportsDB' en appsettings.json.");
 builder.Services.AgregarInfraestructura(cadenaConexion);
 
-// Capa de aplicación: servicios de negocio (Scoped, una instancia por petición).
-builder.Services.AddScoped<IBitacoraService, BitacoraService>();
-builder.Services.AddScoped<IFotoService, FotoService>();
-builder.Services.AddScoped<IVehiculoService, VehiculoService>();
-builder.Services.AddScoped<IRevisionService, RevisionService>();
-builder.Services.AddScoped<IDocumentacionService, DocumentacionService>();
-builder.Services.AddScoped<IClienteService, ClienteService>();
-builder.Services.AddScoped<IApartadoService, ApartadoService>();
-builder.Services.AddScoped<IVentaService, VentaService>();
-builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+// Capa de aplicación: servicios de negocio (Scoped). Se registran con AgregarAplicacion(),
+// el mismo método que usa la API, para que las dos apliquen las mismas reglas.
+builder.Services.AgregarAplicacion();
 
 // Capa web: usuario de la sesión.
 builder.Services.AddScoped<IUsuarioActualService, UsuarioActualService>();
