@@ -1,7 +1,9 @@
 # SED's Imports & Services — Sistema de gestión y seguimiento vehicular
 
-Sistema web de la **Fase 3 (Persistencia de Datos y Arquitectura Empresarial)** de DAS901.
-ASP.NET Core MVC (**.NET 10**) con arquitectura por capas (Domain, Application, Infrastructure y Web), **Entity Framework Core 10** y **SQL Server LocalDB**, patrón Repositorio y Unidad de Trabajo.
+Sistema web de DAS901 · **Fase 4 (Servicios Web, Seguridad y Despliegue)** — en desarrollo.
+ASP.NET Core (**.NET 10**) con arquitectura por capas (Domain, Application, Infrastructure, **Api** y Web), **Entity Framework Core 10** y **SQL Server LocalDB**, patrón Repositorio y Unidad de Trabajo.
+
+> **Fase 4 en curso:** se agregó el proyecto **SedsImports.Api** (API REST) a la solución. Durante la fase se incorporan la autenticación con ASP.NET Core Identity y JWT, la documentación con Swagger, las pruebas, la comunicación asíncrona y el despliegue. Este README se completa al final de la fase.
 
 ## Tecnologías
 
@@ -137,6 +139,7 @@ SedsImports.sln
 │   ├── Datos/                    SedsImportsDbContext, Configuraciones (Fluent API), Migraciones, DatosIniciales
 │   ├── Repositorios/             RepositorioBase<T>, repositorios con LINQ y UnidadDeTrabajo
 │   └── DependencyInjection.cs    AgregarInfraestructura()
+├── SedsImports.Api/              API REST (Fase 4) → depende de Application e Infrastructure
 └── SedsImports.Web/              Presentación MVC → depende de Application e Infrastructure
     ├── Controllers/ Views/ Filters/ Helpers/ Servicios/ wwwroot/
     └── Program.cs                Inyección de dependencias e inicialización de la base de datos
@@ -192,6 +195,7 @@ SedsImports.sln
 - Cada integrante trabaja en su propia rama (`feature/...`) y hace sus propios commits con mensajes descriptivos.
 - Al terminar su parte, cada integrante abre un Pull Request hacia `main`, que se revisa antes de fusionarse.
 - Fase 3: el trabajo se reparte por capas: dominio (Elías), Entity Framework y base de datos (Marlene), repositorios y LINQ (Jason), servicios e integración web (Abner).
+- Fase 4: API REST (Elías), seguridad con Identity y JWT (Marlene), endpoints de operaciones, Swagger y pruebas (Jason), protección, comunicación asíncrona, logging y despliegue (Abner).
 
 ## 6. Notas
 
