@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- API REST del sistema (Fase 4). Reutiliza las capas de aplicación e infraestructura de la Fase 3. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>SedsImports.Api</RootNamespace>
+    <AssemblyName>SedsImports.Api</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.13">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SedsImports.Application\SedsImports.Application.csproj" />
+    <ProjectReference Include="..\SedsImports.Infrastructure\SedsImports.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
