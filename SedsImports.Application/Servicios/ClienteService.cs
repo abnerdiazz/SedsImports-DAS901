@@ -13,6 +13,17 @@ namespace SedsImports.Application.Servicios
 
         public Cliente? Obtener(int id) => _clientes.ObtenerPorId(id);
 
+        public List<Cliente> Listar(string? busqueda)
+        {
+            var texto = busqueda?.Trim();
+            return _clientes.ObtenerTodos()
+                .Where(c => string.IsNullOrEmpty(texto)
+                    || c.Nombre.Contains(texto, StringComparison.OrdinalIgnoreCase)
+                    || (c.Telefono ?? string.Empty).Contains(texto))
+                .OrderBy(c => c.Nombre)
+                .ToList();
+        }
+
         /// <summary>
         /// Reutiliza el cliente si ya existe con el mismo nombre y teléfono; si no, lo agrega.
         /// No guarda: el apartado o la venta que lo usa confirma todo junto con la Unidad de Trabajo.
