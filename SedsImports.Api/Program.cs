@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using SedsImports.Api.Configuracion;
 using SedsImports.Api.Seguridad;
 using SedsImports.Application;
 using SedsImports.Application.Interfaces;
@@ -27,8 +28,9 @@ builder.Services.AgregarIdentidad(cadenaConexion);         // ASP.NET Core Ident
 builder.Services.AgregarAplicacion();                      // Servicios de negocio
 builder.Services.AddScoped<IUsuarioActualService, UsuarioActualApi>();
 
-// ───────────────────────── Seguridad ─────────────────────────
+// ───────────────────────── Seguridad y documentación ─────────────────────────
 builder.Services.AgregarSeguridadJwt(builder.Configuration);    // JWT + políticas por rol
+builder.Services.AgregarDocumentacionApi();                     // Swagger
 
 var app = builder.Build();
 
@@ -36,9 +38,18 @@ var app = builder.Build();
 InicializadorBaseDatos.Inicializar(app.Services);
 await InicializadorIdentidad.InicializarAsync(app.Services);
 
+// Swagger: siempre en desarrollo; en otros entornos solo si Swagger:Habilitado = true.
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Swagger:Habilitado"))
+    app.UsarDocumentacionApi();
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+/// <summary>Permite que el proyecto de pruebas levante la API en memoria (WebApplicationFactory).</summary>
+public partial class Program
+{
+}

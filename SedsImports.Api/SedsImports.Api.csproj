@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <!-- API REST del sistema (Fase 4) con autenticación JWT y ASP.NET Core Identity.
+  <!-- API REST del sistema (Fase 4) con autenticación JWT, ASP.NET Core Identity y documentación con Swagger.
        Reutiliza las capas de aplicación e infraestructura de la Fase 3. -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -8,6 +8,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>SedsImports.Api</RootNamespace>
     <AssemblyName>SedsImports.Api</AssemblyName>
+    <!-- Genera el archivo XML con los comentarios /// para mostrarlos en Swagger. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +19,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
   </ItemGroup>
 
   <ItemGroup>
