@@ -7,11 +7,11 @@ namespace SedsImports.Application.Interfaces
 {
     public interface IUsuarioService
     {
-        ResultadoOperacion<Usuario> Autenticar(string correo, string contrasena);
+        Task<ResultadoOperacion<Usuario>> AutenticarAsync(string correo, string contrasena);
         List<Usuario> Listar();
         Usuario? Obtener(int id);
-        ResultadoOperacion CambiarEstado(int usuarioId, Usuario actor);
-        ResultadoOperacion<Usuario> Crear(NuevoUsuarioViewModel modelo, Usuario actor);
+        Task<ResultadoOperacion> CambiarEstadoAsync(int usuarioId, Usuario actor);
+        Task<ResultadoOperacion<Usuario>> CrearAsync(NuevoUsuarioViewModel modelo, Usuario actor);
 
         /// <summary>Roles disponibles para usuarios nuevos (todos menos el dueño / vendedor).</summary>
         List<Rol> Roles();
