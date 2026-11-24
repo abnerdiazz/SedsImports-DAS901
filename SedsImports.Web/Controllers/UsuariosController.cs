@@ -21,11 +21,11 @@ namespace SedsImports.Web.Controllers
 
         // POST /Usuarios/Crear — formulario del modal "Agregar usuario"
         [HttpPost]
-        public IActionResult Crear([Bind(Prefix = "NuevoUsuario")] NuevoUsuarioViewModel nuevo)
+        public async Task<IActionResult> Crear([Bind(Prefix = "NuevoUsuario")] NuevoUsuarioViewModel nuevo)
         {
             if (ModelState.IsValid)
             {
-                var resultado = _usuarios.Crear(nuevo, UsuarioActual);
+                var resultado = await _usuarios.CrearAsync(nuevo, UsuarioActual);
                 if (resultado.Exitoso)
                 {
                     MostrarExito(resultado.Mensaje);
@@ -49,9 +49,9 @@ namespace SedsImports.Web.Controllers
             Json(new { correo = _usuarios.GenerarCorreo(nombre, apellido) });
 
         [HttpPost]
-        public IActionResult CambiarEstado(int id)
+        public async Task<IActionResult> CambiarEstado(int id)
         {
-            MostrarResultado(_usuarios.CambiarEstado(id, UsuarioActual));
+            MostrarResultado(await _usuarios.CambiarEstadoAsync(id, UsuarioActual));
             return RedirectToAction(nameof(Index));
         }
 
