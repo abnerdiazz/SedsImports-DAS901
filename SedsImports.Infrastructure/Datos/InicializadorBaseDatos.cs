@@ -18,7 +18,9 @@ namespace SedsImports.Infrastructure.Datos
 
             try
             {
-                if (contexto.Database.IsRelational() && contexto.Database.GetMigrations().Any())
+                // SQL Server: aplica las migraciones. Otros proveedores (SQLite en las pruebas
+                // automáticas) crean el esquema directamente desde el modelo.
+                if (contexto.Database.IsSqlServer())
                     contexto.Database.Migrate();
                 else
                     contexto.Database.EnsureCreated();
