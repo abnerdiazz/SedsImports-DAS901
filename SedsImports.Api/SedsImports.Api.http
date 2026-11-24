@@ -1,0 +1,97 @@
+### Pruebas rápidas de la API desde Visual Studio (abre este archivo y presiona "Send request").
+### 1) Ejecuta la API (perfil https). 2) Inicia sesión. 3) Copia el token en @token.
+
+@api = https://localhost:7181
+@token = PEGAR_AQUI_EL_TOKEN
+
+### Iniciar sesión (dueño / vendedor)
+POST {{api}}/api/auth/login
+Content-Type: application/json
+
+{
+  "correo": "ernesto.rivas@sedimports.com",
+  "contrasena": "Seds2026"
+}
+
+### Credenciales incorrectas → 401
+POST {{api}}/api/auth/login
+Content-Type: application/json
+
+{
+  "correo": "ernesto.rivas@sedimports.com",
+  "contrasena": "incorrecta1"
+}
+
+### Perfil del usuario del token
+GET {{api}}/api/auth/perfil
+Authorization: Bearer {{token}}
+
+### Sin token → 401
+GET {{api}}/api/vehiculos
+
+### Listar vehículos (búsqueda y filtro)
+GET {{api}}/api/vehiculos?busqueda=toyota&estado=Disponible
+Authorization: Bearer {{token}}
+
+### Ficha de un vehículo
+GET {{api}}/api/vehiculos/1
+Authorization: Bearer {{token}}
+
+### Registrar vehículo → 201
+POST {{api}}/api/vehiculos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "marca": "Toyota",
+  "modelo": "Corolla",
+  "anio": 2019,
+  "color": "Gris",
+  "vin": "2T1BURHE5KC123456",
+  "detalles": "Golpe leve en la puerta trasera derecha."
+}
+
+### Registrar con datos no válidos → 400
+POST {{api}}/api/vehiculos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "marca": "",
+  "modelo": "Corolla",
+  "anio": 1800,
+  "color": "Gris",
+  "vin": "VIN CON ESPACIOS"
+}
+
+### Editar vehículo → 204
+PUT {{api}}/api/vehiculos/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "marca": "Toyota",
+  "modelo": "Corolla",
+  "anio": 2019,
+  "color": "Negro",
+  "vin": "2T1BURHE5KC123456"
+}
+
+### Eliminar vehículo → 204
+DELETE {{api}}/api/vehiculos/1
+Authorization: Bearer {{token}}
+
+### Indicadores del panel
+GET {{api}}/api/reportes/resumen
+Authorization: Bearer {{token}}
+
+### Reporte de ventas del año
+GET {{api}}/api/reportes/ventas?anio=2026
+Authorization: Bearer {{token}}
+
+### Bitácora paginada
+GET {{api}}/api/bitacora?pagina=1&tamano=10
+Authorization: Bearer {{token}}
+
+### Salud de la API
+GET {{api}}/health
