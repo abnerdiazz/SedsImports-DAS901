@@ -17,23 +17,30 @@ namespace SedsImports.Application.Servicios
         private readonly IUsuarioRepository _usuarios;
         private readonly IRolRepository _roles;
         private readonly IBitacoraService _bitacora;
+        private readonly IServicioIdentidad _identidad;
+
+        /// <summary>
+        /// Valor que queda en la columna ContrasenaHash de la tabla Usuarios desde la Fase 4:
+        /// la contraseña ya no se guarda aquí, sino en la cuenta de ASP.NET Core Identity (hash PBKDF2 con sal).
+        /// </summary>
+        public const string MarcaIdentity = "IDENTITY";
 
         public UsuarioService(IUnidadDeTrabajo unidadDeTrabajo, IUsuarioRepository usuarios, IRolRepository roles,
-            IBitacoraService bitacora) : base(unidadDeTrabajo)
+            IBitacoraService bitacora, IServicioIdentidad identidad) : base(unidadDeTrabajo)
         {
             _usuarios = usuarios;
             _roles = roles;
             _bitacora = bitacora;
+            _identidad = identidad;
         }
 
-        public ResultadoOperacion<Usuario> Autenticar(string correo, string contrasena)
+        public async Task<ResultadoOperacion<Usuario>> AutenticarAsync(string correo, string contrasena)
         {
-            var usuario = _usuarios.ObtenerPorCorreo(correo ?? string.Empty);
+            // Identity valida la contraseña, cuenta los intentos fallidos y bloquea la cuenta si se excede el límite.
+            var resultado = await _identidad.AutenticarAsync(correo ?? string.Empty, contrasena ?? string.Empty);
+            if (!resultado.Exitoso || resultado.Dato == null) return resultado;
 
-            // Mismo mensaje para usuario o contraseña incorrectos: no revela cuál de los dos falló.
-            if (usuario == null || usuario.ContrasenaHash != Seguridad.Hash(contrasena ?? string.Empty))
-                return ResultadoOperacion<Usuario>.Error("Usuario o contraseña incorrectos.");
-
+            var usuario = resultado.Dato;
             if (!usuario.Activo)
                 return ResultadoOperacion<Usuario>.Error("Tu usuario está desactivado. Consulta con el administrador.");
 
@@ -44,7 +51,7 @@ namespace SedsImports.Application.Servicios
 
         public Usuario? Obtener(int id) => _usuarios.ObtenerPorId(id);
 
-        public ResultadoOperacion CambiarEstado(int usuarioId, Usuario actor)
+        public async Task<ResultadoOperacion> CambiarEstadoAsync(int usuarioId, Usuario actor)
         {
             if (!Permisos.PuedeAdministrar(actor.Rol.Tipo)) return ResultadoOperacion.Error(Permisos.SinPermiso);
 
@@ -58,7 +65,12 @@ namespace SedsImports.Application.Servicios
             var accion = usuario.Activo ? "Activó" : "Desactivó";
             _bitacora.Registrar(actor, null, TipoMovimiento.Usuario, $"{accion} el usuario {usuario.NombreCompleto} ({usuario.Rol.Nombre})");
 
-            return Guardar($"Usuario {usuario.NombreCompleto} {(usuario.Activo ? "activado" : "desactivado")}.");
+            var resultado = Guardar($"Usuario {usuario.NombreCompleto} {(usuario.Activo ? "activado" : "desactivado")}.");
+
+            // La cuenta de Identity se bloquea o desbloquea junto con el usuario: un usuario
+            // desactivado no puede obtener un token de la API ni iniciar sesión en la Web.
+            if (resultado.Exitoso) await _identidad.ActualizarEstadoAsync(usuario);
+            return resultado;
         }
 
         /// <summary>
@@ -70,7 +82,7 @@ namespace SedsImports.Application.Servicios
             .OrderBy(r => r.Tipo)
             .ToList();
 
-        public ResultadoOperacion<Usuario> Crear(NuevoUsuarioViewModel modelo, Usuario actor)
+        public async Task<ResultadoOperacion<Usuario>> CrearAsync(NuevoUsuarioViewModel modelo, Usuario actor)
         {
             if (!Permisos.PuedeAdministrar(actor.Rol.Tipo))
                 return ResultadoOperacion<Usuario>.Error(Permisos.SinPermiso);
@@ -94,7 +106,7 @@ namespace SedsImports.Application.Servicios
             {
                 NombreCompleto = $"{nombre} {apellido}",
                 Correo = correo,
-                ContrasenaHash = Seguridad.Hash(modelo.Contrasena),
+                ContrasenaHash = MarcaIdentity,
                 Rol = rol,
                 Activo = modelo.Activo
             });
@@ -102,7 +114,20 @@ namespace SedsImports.Application.Servicios
             _bitacora.Registrar(actor, null, TipoMovimiento.Usuario,
                 $"Creó el usuario {usuario.NombreCompleto} ({rol.Nombre}) · {usuario.Correo} · {(usuario.Activo ? "Activo" : "Inactivo")}");
 
-            return Guardar(usuario, $"Usuario {usuario.NombreCompleto} creado. Inicia sesión con {usuario.Correo}.");
+            var guardado = Guardar(usuario, $"Usuario {usuario.NombreCompleto} creado. Inicia sesión con {usuario.Correo}.");
+            if (!guardado.Exitoso) return guardado;
+
+            // Cuenta de acceso en Identity con el rol y la contraseña (Identity aplica su política de contraseñas).
+            var cuenta = await _identidad.CrearCuentaAsync(usuario, modelo.Contrasena);
+            if (!cuenta.Exitoso)
+            {
+                // Compensación: si Identity rechaza la cuenta, se quita el usuario para no dejarlo sin acceso.
+                _usuarios.Eliminar(usuario);
+                UnidadDeTrabajo.GuardarCambios();
+                return ResultadoOperacion<Usuario>.ErrorCampo(nameof(modelo.Contrasena), cuenta.Mensaje);
+            }
+
+            return guardado;
         }
 
         public string GenerarCorreo(string? nombre, string? apellido)

@@ -27,11 +27,12 @@ namespace SedsImports.Web.Controllers
 
         // POST /Acceso  — Model Binding: los campos del formulario llenan LoginViewModel.
         [HttpPost]
-        public IActionResult Index(LoginViewModel modelo)
+        public async Task<IActionResult> Index(LoginViewModel modelo)
         {
             if (!ModelState.IsValid) return View(modelo);
 
-            var resultado = _usuarios.Autenticar(modelo.Correo, modelo.Contrasena);
+            // ASP.NET Core Identity verifica la contraseña y bloquea la cuenta tras varios intentos fallidos.
+            var resultado = await _usuarios.AutenticarAsync(modelo.Correo, modelo.Contrasena);
             if (!resultado.Exitoso || resultado.Dato == null)
             {
                 ModelState.AddModelError(string.Empty, resultado.Mensaje);

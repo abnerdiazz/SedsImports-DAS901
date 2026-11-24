@@ -5,6 +5,7 @@ using SedsImports.Application;
 using SedsImports.Application.Interfaces;
 using SedsImports.Infrastructure;
 using SedsImports.Infrastructure.Datos;
+using SedsImports.Infrastructure.Identidad;
 using SedsImports.Web.Filters;
 using SedsImports.Web.Servicios;
 
@@ -20,7 +21,7 @@ builder.Services.AddControllersWithViews(opciones =>
     opciones.Filters.Add<ErrorPersistenciaFilter>();
 });
 
-// Sesión: guarda el usuario que inició sesión (la autenticación formal llega en la Fase 4).
+// Sesión: guarda el usuario que inició sesión (las credenciales se validan con ASP.NET Core Identity).
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(opciones =>
 {
@@ -37,6 +38,9 @@ var cadenaConexion = builder.Configuration.GetConnectionString("SedsImportsDB")
     ?? throw new InvalidOperationException("Falta la cadena de conexión 'SedsImportsDB' en appsettings.json.");
 builder.Services.AgregarInfraestructura(cadenaConexion);
 
+// ASP.NET Core Identity: cuentas de acceso, roles y bloqueo por intentos fallidos (esquema seguridad).
+builder.Services.AgregarIdentidad(cadenaConexion);
+
 // Capa de aplicación: servicios de negocio (Scoped). Se registran con AgregarAplicacion(),
 // el mismo método que usa la API, para que las dos apliquen las mismas reglas.
 builder.Services.AgregarAplicacion();
@@ -48,6 +52,7 @@ var app = builder.Build();
 
 // Crea o actualiza la base de datos (migraciones) y carga los datos iniciales si está vacía.
 InicializadorBaseDatos.Inicializar(app.Services);
+await InicializadorIdentidad.InicializarAsync(app.Services);
 
 // Cultura de El Salvador para fechas y números.
 var cultura = new CultureInfo("es-SV");
