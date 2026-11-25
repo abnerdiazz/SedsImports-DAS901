@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SedsImports.Infrastructure"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SedsImports.Api", "SedsImports.Api\SedsImports.Api.csproj", "{F8682398-1F7B-4855-9C10-179D85E51A30}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SedsImports.Tests", "SedsImports.Tests\SedsImports.Tests.csproj", "{871988ED-B3B0-4EAA-930F-B7171CFD86D7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,18 @@ Global
 		{F8682398-1F7B-4855-9C10-179D85E51A30}.Release|x64.Build.0 = Release|Any CPU
 		{F8682398-1F7B-4855-9C10-179D85E51A30}.Release|x86.ActiveCfg = Release|Any CPU
 		{F8682398-1F7B-4855-9C10-179D85E51A30}.Release|x86.Build.0 = Release|Any CPU
+		{871988ED-B3B0-4EAA-930F-B7171CFD86D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{871988ED-B3B0-4EAA-930F-B7171CFD86D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{871988ED-B3B0-4EAA-930F-B7171CFD86D7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{871988ED-B3B0-4EAA-930F-B7171CFD86D7}.Debug|x64.Build.0 = Debug|Any CPU
+		{871988ED-B3B0-4EAA-930F-B7171CFD86D7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{871988ED-B3B0-4EAA-930F-B7171CFD86D7}.Debug|x86.Build.0 = Debug|Any CPU
+		{871988ED-B3B0-4EAA-930F-B7171CFD86D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{871988ED-B3B0-4EAA-930F-B7171CFD86D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{871988ED-B3B0-4EAA-930F-B7171CFD86D7}.Release|x64.ActiveCfg = Release|Any CPU
+		{871988ED-B3B0-4EAA-930F-B7171CFD86D7}.Release|x64.Build.0 = Release|Any CPU
+		{871988ED-B3B0-4EAA-930F-B7171CFD86D7}.Release|x86.ActiveCfg = Release|Any CPU
+		{871988ED-B3B0-4EAA-930F-B7171CFD86D7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
