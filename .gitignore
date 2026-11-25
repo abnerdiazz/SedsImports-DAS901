@@ -12,3 +12,6 @@ TestResults/
 
 ## Fotografías subidas mientras se prueba el sistema
 SedsImports.Web/wwwroot/uploads/vehiculos/
+
+## Archivos de log de Serilog
+**/logs/
