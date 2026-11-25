@@ -25,7 +25,9 @@
             <input type="hidden" name="estado" value="@Model.EstadoFiltro" />
         }
         <label class="sr-only" for="busqueda">Buscar</label>
-        <input class="campo" id="busqueda" name="busqueda" value="@Model.Busqueda" placeholder="Buscar por marca, modelo, año o VIN" />
+        <input class="campo" id="busqueda" name="busqueda" value="@Model.Busqueda" placeholder="Buscar por marca, modelo, año o VIN"
+               autocomplete="off" maxlength="60"
+               data-busqueda-vivo data-url="@Url.Action("Vehiculos", "Datos")" data-estado="@Model.EstadoFiltro" data-destino="#filas-vehiculos" data-vacio="#sin-vehiculos" />
     </form>
 
     <nav class="chips" aria-label="Filtrar por estado">
@@ -53,16 +55,10 @@
                     <th class="derecha">Ingreso</th>
                 </tr>
             </thead>
-            <tbody>
-                @foreach (var v in Model.Vehiculos)
-                {
-                    <partial name="_VehiculoFila" model="v" />
-                }
+            <tbody id="filas-vehiculos" aria-live="polite">
+                <partial name="_FilasVehiculos" model="Model.Vehiculos" />
             </tbody>
         </table>
     </div>
-    @if (!Model.Vehiculos.Any())
-    {
-        <p class="vacio">No se encontraron vehículos que coincidan con la búsqueda o el filtro.</p>
-    }
+    <p class="vacio" id="sin-vehiculos" @(Model.Vehiculos.Any() ? "hidden" : "")>No se encontraron vehículos que coincidan con la búsqueda o el filtro.</p>
 </section>
