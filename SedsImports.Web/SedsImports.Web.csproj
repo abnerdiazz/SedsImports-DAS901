@@ -10,6 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Logging estructurado en consola y archivo (logs/web-AAAAMMDD.log). -->
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <!-- Necesario para ejecutar Add-Migration / dotnet ef con la Web como proyecto de inicio. -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.13">
       <PrivateAssets>all</PrivateAssets>
