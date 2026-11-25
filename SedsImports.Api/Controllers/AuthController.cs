@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using SedsImports.Api.Configuracion;
 using SedsImports.Api.Seguridad;
 using SedsImports.Application.DTOs.Api;
 using SedsImports.Application.Interfaces;
@@ -35,10 +37,13 @@ namespace SedsImports.Api.Controllers
         /// <response code="200">Credenciales correctas: token, fecha de vencimiento y datos del usuario.</response>
         /// <response code="400">Faltan datos o el correo no es válido.</response>
         /// <response code="401">Correo o contraseña incorrectos, usuario desactivado o cuenta bloqueada.</response>
+        /// <response code="429">Demasiados intentos desde la misma dirección (más de 10 por minuto).</response>
         [HttpPost("login")]
         [AllowAnonymous]
+        [EnableRateLimiting(ProteccionConfiguracion.PoliticaLogin)]
         [ProducesResponseType(typeof(TokenDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
             var resultado = await _usuarios.AutenticarAsync(dto.Correo, dto.Contrasena);
