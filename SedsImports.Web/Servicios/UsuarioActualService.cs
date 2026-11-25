@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using SedsImports.Application.Interfaces;
 using SedsImports.Domain.Entidades;
 using SedsImports.Domain.Enums;
@@ -6,14 +7,12 @@ using SedsImports.Domain.Interfaces;
 namespace SedsImports.Web.Servicios
 {
     /// <summary>
-    /// Mantiene el usuario de la sesión. Guarda solo el Id en la sesión y lo busca en la base de datos
-    /// en cada petición, así un usuario desactivado pierde el acceso en su siguiente petición.
-    /// Vive en la capa web porque depende de la sesión HTTP.
+    /// Usuario que inició sesión en la aplicación web. Desde la Fase 4 se identifica con la cookie de
+    /// autenticación de ASP.NET Core (claims), que se crea con los datos que devuelve la API al iniciar
+    /// sesión. Se carga de la base de datos una sola vez por petición.
     /// </summary>
     public class UsuarioActualService : IUsuarioActualService
     {
-        public const string ClaveSesion = "UsuarioId";
-
         private readonly IHttpContextAccessor _http;
         private readonly IUsuarioRepository _usuarios;
         private Usuario? _cache;
@@ -32,8 +31,11 @@ namespace SedsImports.Web.Servicios
                 if (_cargado) return _cache;
                 _cargado = true;
 
-                var id = _http.HttpContext?.Session.GetInt32(ClaveSesion);
-                var usuario = id.HasValue ? _usuarios.ObtenerPorId(id.Value) : null;
+                var principal = _http.HttpContext?.User;
+                var valor = principal?.Identity?.IsAuthenticated == true ? principal.FindFirstValue(ClaimTypes.NameIdentifier) : null;
+                var usuario = int.TryParse(valor, out var id) ? _usuarios.ObtenerPorId(id) : null;
+
+                // Si el dueño desactiva al usuario, pierde el acceso aunque su cookie siga vigente.
                 _cache = usuario is { Activo: true } ? usuario : null;
                 return _cache;
             }
@@ -43,16 +45,15 @@ namespace SedsImports.Web.Servicios
 
         public TipoRol? Rol => Usuario?.Rol.Tipo;
 
+        /// <summary>La cookie la crea AccesoController; aquí solo se deja el usuario listo para la petición actual.</summary>
         public void IniciarSesion(Usuario usuario)
         {
-            _http.HttpContext?.Session.SetInt32(ClaveSesion, usuario.Id);
             _cache = usuario;
             _cargado = true;
         }
 
         public void CerrarSesion()
         {
-            _http.HttpContext?.Session.Clear();
             _cache = null;
             _cargado = true;
         }

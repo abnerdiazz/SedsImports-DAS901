@@ -1,20 +1,30 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using SedsImports.Application.Comun;
+using Microsoft.AspNetCore.RateLimiting;
 using SedsImports.Application.Interfaces;
 using SedsImports.Application.ViewModels;
+using SedsImports.Web.Servicios.Api;
 
 namespace SedsImports.Web.Controllers
 {
-    /// <summary>Inicio y cierre de sesión, y página de acceso denegado.</summary>
+    /// <summary>
+    /// Inicio y cierre de sesión. Desde la Fase 4 las credenciales se validan en la API REST
+    /// (POST /api/auth/login, con ASP.NET Core Identity); la API devuelve un token JWT que se guarda
+    /// cifrado en la cookie de autenticación para usarlo en las llamadas posteriores a la API.
+    /// </summary>
     public class AccesoController : BaseController
     {
-        private readonly IUsuarioService _usuarios;
+        private readonly ISedsApiCliente _api;
         private readonly IUsuarioActualService _sesion;
+        private readonly IUsuarioService _usuarios;
 
-        public AccesoController(IUsuarioService usuarios, IUsuarioActualService sesion)
+        public AccesoController(ISedsApiCliente api, IUsuarioActualService sesion, IUsuarioService usuarios)
         {
-            _usuarios = usuarios;
+            _api = api;
             _sesion = sesion;
+            _usuarios = usuarios;
         }
 
         // GET /Acceso  (también es la página de inicio de la aplicación)
@@ -25,22 +35,43 @@ namespace SedsImports.Web.Controllers
             return View(new LoginViewModel { ReturnUrl = returnUrl });
         }
 
-        // POST /Acceso  — Model Binding: los campos del formulario llenan LoginViewModel.
+        // POST /Acceso — el token antifalsificación (CSRF) se valida con el filtro global.
         [HttpPost]
+        [EnableRateLimiting("login")]
         public async Task<IActionResult> Index(LoginViewModel modelo)
         {
             if (!ModelState.IsValid) return View(modelo);
 
-            // ASP.NET Core Identity verifica la contraseña y bloquea la cuenta tras varios intentos fallidos.
-            var resultado = await _usuarios.AutenticarAsync(modelo.Correo, modelo.Contrasena);
-            if (!resultado.Exitoso || resultado.Dato == null)
+            var respuesta = await _api.IniciarSesionAsync(modelo.Correo, modelo.Contrasena);
+            var usuario = respuesta.Exitosa ? _usuarios.Obtener(respuesta.Dato!.Usuario.Id) : null;
+            if (!respuesta.Exitosa || usuario == null)
             {
-                ModelState.AddModelError(string.Empty, resultado.Mensaje);
+                ModelState.AddModelError(string.Empty, respuesta.Error ?? "Usuario o contraseña incorrectos.");
                 modelo.Contrasena = string.Empty;
                 return View(modelo);
             }
 
-            _sesion.IniciarSesion(resultado.Dato);
+            var token = respuesta.Dato!;
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+                new(ClaimTypes.Name, usuario.NombreCompleto),
+                new(ClaimTypes.Email, usuario.Correo),
+                new(ClaimTypes.Role, usuario.Rol.Tipo.ToString())
+            };
+
+            var propiedades = new AuthenticationProperties
+            {
+                // La sesión de la web dura lo mismo que el token de la API.
+                ExpiresUtc = DateTime.SpecifyKind(token.Expira, DateTimeKind.Utc),
+                IsPersistent = false,
+                AllowRefresh = false
+            };
+            propiedades.StoreTokens(new[] { new AuthenticationToken { Name = ManejadorTokenApi.NombreToken, Value = token.Token } });
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme)), propiedades);
+            _sesion.IniciarSesion(usuario);
 
             if (!string.IsNullOrEmpty(modelo.ReturnUrl) && Url.IsLocalUrl(modelo.ReturnUrl))
                 return LocalRedirect(modelo.ReturnUrl);
@@ -49,8 +80,9 @@ namespace SedsImports.Web.Controllers
         }
 
         [HttpPost]
-        public IActionResult Salir()
+        public async Task<IActionResult> Salir()
         {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             _sesion.CerrarSesion();
             return RedirectToAction(nameof(Index));
         }
