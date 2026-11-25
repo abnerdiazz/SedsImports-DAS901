@@ -1,4 +1,5 @@
 @inject IUsuarioActualService Sesion
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @{
     var usuario = Sesion.Usuario;
     var sinMenu = ViewData["SinMenu"] as bool? == true || usuario == null;
@@ -32,6 +33,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @* Token antifalsificación para las peticiones Fetch (se envía en el encabezado X-CSRF-TOKEN). *@
+    <meta name="csrf-token" content="@Antiforgery.GetAndStoreTokens(Context).RequestToken" />
     <title>@(string.IsNullOrEmpty(titulo) ? "" : titulo + " · ")SED's Imports</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -109,6 +112,7 @@
     </dialog>
 
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/asincrono.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
