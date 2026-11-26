@@ -1,15 +1,19 @@
 @model InicioViewModel
 @* Panel del dueño / vendedor: visión general del negocio y lo que espera su autorización. *@
-<div class="kpis">
-    <a class="kpi" asp-controller="Vehiculos" asp-action="Index"><div class="kpi-valor">@Model.Conteos.Total</div><div class="kpi-etiqueta">Vehículos</div></a>
-    <a class="kpi" asp-controller="Vehiculos" asp-action="Index" asp-route-estado="RecienLlegado"><div class="kpi-valor c-azul">@Model.Conteos.De(EstadoVehiculo.RecienLlegado)</div><div class="kpi-etiqueta">Recién llegados</div></a>
-    <a class="kpi" asp-controller="Vehiculos" asp-action="Index" asp-route-estado="EnRevision"><div class="kpi-valor c-naranja">@Model.Conteos.De(EstadoVehiculo.EnRevision)</div><div class="kpi-etiqueta">En revisión</div></a>
-    <a class="kpi" asp-controller="Vehiculos" asp-action="Index" asp-route-estado="RevisionFinalizada"><div class="kpi-valor c-teal">@Model.Conteos.De(EstadoVehiculo.RevisionFinalizada)</div><div class="kpi-etiqueta">Por autorizar</div></a>
-    <a class="kpi" asp-controller="Apartados" asp-action="Disponibles"><div class="kpi-valor c-verde">@Model.Conteos.De(EstadoVehiculo.Disponible)</div><div class="kpi-etiqueta">Disponibles</div></a>
-    <a class="kpi" asp-controller="Apartados" asp-action="Index"><div class="kpi-valor c-morado">@Model.Conteos.De(EstadoVehiculo.Apartado)</div><div class="kpi-etiqueta">Apartados</div></a>
-    <a class="kpi" asp-controller="Ventas" asp-action="Index"><div class="kpi-valor c-gris">@Model.VendidosMes</div><div class="kpi-etiqueta">Vendidos este mes</div></a>
-    <a class="kpi" asp-controller="Ventas" asp-action="Reporte"><div class="kpi-valor">@Formato.Dinero(Model.VentasMes)</div><div class="kpi-etiqueta">Ventas del mes</div></a>
+<div class="kpis" data-resumen-vivo data-url="@Url.Action("Resumen", "Datos")" data-segundos="60">
+    <a class="kpi" asp-controller="Vehiculos" asp-action="Index"><div class="kpi-valor" data-kpi="total">@Model.Conteos.Total</div><div class="kpi-etiqueta">Vehículos</div></a>
+    <a class="kpi" asp-controller="Vehiculos" asp-action="Index" asp-route-estado="RecienLlegado"><div class="kpi-valor c-azul" data-kpi="RecienLlegado">@Model.Conteos.De(EstadoVehiculo.RecienLlegado)</div><div class="kpi-etiqueta">Recién llegados</div></a>
+    <a class="kpi" asp-controller="Vehiculos" asp-action="Index" asp-route-estado="EnRevision"><div class="kpi-valor c-naranja" data-kpi="EnRevision">@Model.Conteos.De(EstadoVehiculo.EnRevision)</div><div class="kpi-etiqueta">En revisión</div></a>
+    <a class="kpi" asp-controller="Vehiculos" asp-action="Index" asp-route-estado="RevisionFinalizada"><div class="kpi-valor c-teal" data-kpi="RevisionFinalizada">@Model.Conteos.De(EstadoVehiculo.RevisionFinalizada)</div><div class="kpi-etiqueta">Por autorizar</div></a>
+    <a class="kpi" asp-controller="Apartados" asp-action="Disponibles"><div class="kpi-valor c-verde" data-kpi="Disponible">@Model.Conteos.De(EstadoVehiculo.Disponible)</div><div class="kpi-etiqueta">Disponibles</div></a>
+    <a class="kpi" asp-controller="Apartados" asp-action="Index"><div class="kpi-valor c-morado" data-kpi="Apartado">@Model.Conteos.De(EstadoVehiculo.Apartado)</div><div class="kpi-etiqueta">Apartados</div></a>
+    <a class="kpi" asp-controller="Ventas" asp-action="Index"><div class="kpi-valor c-gris" data-kpi="vendidosMes">@Model.VendidosMes</div><div class="kpi-etiqueta">Vendidos este mes</div></a>
+    <a class="kpi" asp-controller="Ventas" asp-action="Reporte"><div class="kpi-valor" data-kpi="ventasMes" data-formato="dinero">@Formato.Dinero(Model.VentasMes)</div><div class="kpi-etiqueta">Ventas del mes</div></a>
 </div>
+<p class="ayuda actualizacion-kpis">
+    <span data-resumen-estado>Indicadores en tiempo real.</span>
+    <button type="button" class="btn btn-secundario btn-sm" data-resumen-actualizar>Actualizar</button>
+</p>
 
 @if (Model.PorAutorizar.Any())
 {

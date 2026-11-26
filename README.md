@@ -1,77 +1,141 @@
 # SED's Imports & Services — Sistema de gestión y seguimiento vehicular
 
-Sistema web de DAS901 · **Fase 4 (Servicios Web, Seguridad y Despliegue)** — en desarrollo.
-ASP.NET Core (**.NET 10**) con arquitectura por capas (Domain, Application, Infrastructure, **Api** y Web), **Entity Framework Core 10** y **SQL Server LocalDB**, patrón Repositorio y Unidad de Trabajo.
+Sistema web de la **Fase 4 (Servicios Web, Seguridad y Despliegue)** de DAS901 — proyecto final.
+ASP.NET Core (**.NET 10**) con arquitectura por capas (Domain, Application, Infrastructure, **Api** y Web), **Entity Framework Core 10**, **SQL Server LocalDB**, **API REST** con **JWT** y **ASP.NET Core Identity**, documentación con **Swagger**, logging con **Serilog**, pruebas automáticas con **xUnit** y despliegue en **IIS**.
 
-> **Fase 4 en curso:** se agregó el proyecto **SedsImports.Api** (API REST) a la solución. Durante la fase se incorporan la autenticación con ASP.NET Core Identity y JWT, la documentación con Swagger, las pruebas, la comunicación asíncrona y el despliegue. Este README se completa al final de la fase.
+> [!IMPORTANT]
+> **🎬 Video demostrativo de la Fase 4:** https://youtu.be/MjtgkQOvVxc
+>
+> [![Video de la Fase 4 en YouTube](https://img.youtube.com/vi/MjtgkQOvVxc/hqdefault.jpg)](https://youtu.be/MjtgkQOvVxc)
+
+**Videos de las fases anteriores:** [Fase 3 – Persistencia de Datos y Arquitectura Empresarial](https://youtu.be/cvyGGc9cujc)
 
 ## Tecnologías
 
 | Tecnología | Uso en el proyecto |
 |---|---|
-| **C# 14 / .NET 10** | Lenguaje y plataforma de la aplicación |
-| **ASP.NET Core MVC** | Patrón Modelo-Vista-Controlador, rutas, filtros e inyección de dependencias |
-| **Razor** (Tag Helpers, HTML Helpers, vistas parciales y layouts) | Interfaz web del sistema |
-| **DataAnnotations + jQuery Validation Unobtrusive** | Validación en el servidor y en el navegador |
-| **HTML5, CSS3 y JavaScript** | Diseño responsive, menú para celular y ventanas modales |
-| **Sesión de ASP.NET Core** | Inicio de sesión por perfil (la seguridad formal llega en la Fase 4) |
-| **Entity Framework Core 10 (Code First)** | DbContext, Fluent API, migraciones, LINQ y datos iniciales |
-| **SQL Server Express LocalDB** | Base de datos `SedsImportsDB` |
-| **Repositorio + Unidad de Trabajo** | Acceso a datos desacoplado de la lógica del negocio |
-| **Figma** | Wireframes y mockups del prototipo |
-| **Git y GitHub** | Control de versiones con una rama por integrante y Pull Requests |
+| **C# 14 / .NET 10** | Lenguaje y plataforma |
+| **ASP.NET Core MVC** | Aplicación web (vistas Razor, controladores, filtros) |
+| **ASP.NET Core Web API** | API REST: controladores `[ApiController]`, GET/POST/PUT/DELETE, respuestas HTTP y ProblemDetails |
+| **ASP.NET Core Identity** | Cuentas, contraseñas con hash PBKDF2 + sal, roles y bloqueo por intentos fallidos |
+| **JWT (JSON Web Token)** | Autenticación de la API; políticas de autorización por rol |
+| **Swagger / OpenAPI (Swashbuckle)** | Documentación interactiva de los endpoints con botón *Authorize* |
+| **Fetch API + JSON** | Comunicación asíncrona: búsqueda en vivo, indicadores y anotaciones sin recargar |
+| **Serilog** | Logging en consola y archivos diarios (`logs/`) con registro de cada petición |
+| **Entity Framework Core 10 (Code First)** | DbContext, Fluent API, migraciones y LINQ |
+| **SQL Server Express LocalDB** | Base de datos `SedsImportsDB` (datos del negocio + esquema `seguridad` de Identity) |
+| **xUnit + WebApplicationFactory + SQLite** | 33 pruebas de integración de la API |
+| **Postman** | Colección de pruebas manuales (`docs/postman`) |
+| **IIS** | Publicación de la API y la web (`scripts/publicar-iis.ps1`) |
+| **Git y GitHub** | Una rama por integrante y Pull Requests |
 
 ---
 
-## 1. Cómo ejecutarlo
+## 1. Cómo ejecutarlo (desarrollo)
 
 ### Requisitos
 
-- **Visual Studio 2026**, o **Visual Studio 2022 versión 17.14 o superior**, con la carga de trabajo *Desarrollo de ASP.NET y web*.
+- **Visual Studio 2026**, o **Visual Studio 2022 17.14 o superior**, con la carga de trabajo *Desarrollo de ASP.NET y web*.
 - **SDK de .NET 10**: <https://dotnet.microsoft.com/download/dotnet/10.0>
-- **SQL Server Express LocalDB** (componente individual de Visual Studio *SQL Server Express LocalDB*; viene marcado con la carga de trabajo de ASP.NET y web).
-- Opcional, para manejar migraciones desde la terminal: `dotnet tool install --global dotnet-ef --version 10.0.13`
+- **SQL Server Express LocalDB** (viene con la carga de trabajo de ASP.NET y web).
+- Opcional: **Postman** para la colección de pruebas.
 
 ### Pasos
 
-1. Descomprime el ZIP o clona el repositorio.
-2. Abre **`SedsImports.sln`** con Visual Studio. Clic derecho sobre **SedsImports.Web → Establecer como proyecto de inicio** (si no lo está ya).
-3. Presiona **F5** (o *Ctrl + F5*). El navegador se abre en la pantalla de inicio de sesión.
-   - **La primera vez, la aplicación crea sola la base de datos `SedsImportsDB` en LocalDB** (aplica la migración `InitialCreate`) y carga los datos de ejemplo. Tarda unos segundos más que las siguientes veces.
-   - La primera vez, Visual Studio puede preguntar si confías en el certificado HTTPS de desarrollo. Responde **Sí**.
-   - Si no quieres usar HTTPS, elige el perfil **http** en el botón verde de ejecución.
-   - También se abre una ventana de consola con el servidor. Es normal y debe quedar abierta mientras usas el sistema.
-   - Si al presionar F5 solo aparece la consola y no se abre el navegador, falta la carga de trabajo **Desarrollo de ASP.NET y web**. Agrégala desde *Visual Studio Installer → Modificar*.
+1. Clona el repositorio y abre **`SedsImports.sln`**.
+2. La web ahora **consume la API**, así que se ejecutan los dos proyectos a la vez:
+   clic derecho en la solución → **Configurar proyectos de inicio** → **Varios proyectos de inicio** → **SedsImports.Api** y **SedsImports.Web** en *Iniciar* (la API primero) → Aceptar.
+3. Presiona **F5**. Se abren dos pestañas:
+   - **API (Swagger):** <https://localhost:7181/swagger>
+   - **Aplicación web:** <https://localhost:7180>
+4. La primera vez se crea sola la base `SedsImportsDB` (migraciones `InitialCreate` y `AgregarIdentidad`), se cargan los datos de ejemplo y se crean los roles y las cuentas de Identity.
 
-Desde la terminal también funciona: `dotnet run --project SedsImports.Web`. Después abre <http://localhost:5180>.
-
-### Base de datos
-
-- Cadena de conexión: `ConnectionStrings:SedsImportsDB` en `SedsImports.Web/appsettings.json`:
-  `Server=(localdb)\MSSQLLocalDB;Database=SedsImportsDB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True`
-- Para ver las tablas: **Ver → Explorador de objetos de SQL Server → (localdb)\MSSQLLocalDB → Bases de datos → SedsImportsDB**.
-- Crear o actualizar la base manualmente (opcional, la aplicación lo hace sola al iniciar):
-  `dotnet ef database update --project SedsImports.Infrastructure --startup-project SedsImports.Web`
-- Nueva migración después de cambiar una entidad:
-  `dotnet ef migrations add NombreDelCambio --project SedsImports.Infrastructure --startup-project SedsImports.Web --output-dir Datos/Migraciones`
-- **Volver a los datos de ejemplo:** borra la base (`dotnet ef database drop --project SedsImports.Infrastructure --startup-project SedsImports.Web`) y vuelve a ejecutar la aplicación.
+Desde la terminal: `dotnet run --project SedsImports.Api --launch-profile https` y, en otra terminal, `dotnet run --project SedsImports.Web --launch-profile https`.
 
 ### Usuarios de prueba
 
-Todos usan la contraseña **`Seds2026`**. El dueño puede crear más usuarios desde **Usuarios → Agregar usuario**.
+Todos usan la contraseña **`Seds2026`**. Tras **5 intentos fallidos** la cuenta se bloquea **15 minutos**.
 
-| Usuario | Perfil |
+| Usuario | Perfil (rol) |
 |---|---|
-| mario.sanchez@sedimports.com | Encargado de patio |
-| jose.hernandez@sedimports.com | Mecánico |
-| dania.martinez@sedimports.com | Asistente administrativa |
-| ernesto.rivas@sedimports.com | Dueño / vendedor |
+| mario.sanchez@sedimports.com | Encargado de patio (`EncargadoPatio`) |
+| jose.hernandez@sedimports.com | Mecánico (`Mecanico`) |
+| dania.martinez@sedimports.com | Asistente administrativa (`AsistenteAdministrativa`) |
+| ernesto.rivas@sedimports.com | Dueño / vendedor (`DuenoVendedor`) |
 
-> Los datos se guardan en **SQL Server**: lo que registres se conserva aunque detengas la aplicación.
+### Clave del token JWT
+
+- En desarrollo está en `SedsImports.Api/appsettings.Development.json`.
+- En producción **no se guarda en el repositorio**: se define en la variable de entorno `Jwt__Clave` (el script de IIS genera una aleatoria) o con `dotnet user-secrets set "Jwt:Clave" "..." --project SedsImports.Api`. Si falta o tiene menos de 32 caracteres, la API no inicia.
 
 ---
 
-## 2. Qué puede hacer cada perfil
+## 2. API REST
+
+Base: `https://localhost:7181/api`. Todas las rutas (menos `login` y `/health`) exigen `Authorization: Bearer {token}`. Los errores usan **ProblemDetails** (RFC 7807).
+
+| Recurso | Endpoints | Quién |
+|---|---|---|
+| Autenticación | `POST /auth/login` · `GET /auth/perfil` | Todos |
+| Vehículos | `GET /vehiculos` · `GET /vehiculos/{id}` · `GET /vehiculos/conteos` · `POST /vehiculos` · `PUT /vehiculos/{id}` · `DELETE /vehiculos/{id}` · `POST /vehiculos/{id}/autorizacion` | Consulta: todos · Alta/edición: patio y dueño · Autorizar/eliminar: dueño |
+| Revisión | `GET /vehiculos/{id}/revision` · `POST /vehiculos/{id}/revision` · `GET/POST /vehiculos/{id}/revision/notas` · `PUT /vehiculos/{id}/revision/finalizacion` · `POST /vehiculos/{id}/revision/regreso` | Mecánico (regreso: mecánico y dueño) |
+| Documentación | `GET /documentaciones` · `GET/PUT /vehiculos/{id}/documentacion` | Asistente y dueño |
+| Apartados | `GET /apartados` · `POST /apartados` · `GET /vehiculos/{id}/apartado` · `POST /vehiculos/{id}/apartado/cancelacion` | Dueño |
+| Ventas | `GET /ventas` · `POST /ventas` · `GET /vehiculos/{id}/venta` | Dueño |
+| Reportes | `GET /reportes/resumen` · `GET /reportes/ventas?anio=` · `GET /reportes/anios` | Resumen: todos · Ventas: dueño |
+| Bitácora | `GET /bitacora?pagina=&tamano=&busqueda=` · `GET /vehiculos/{id}/bitacora` | Dueño |
+| Usuarios | `GET /usuarios` · `GET /usuarios/{id}` · `GET /usuarios/{id}/roles` · `POST /usuarios` · `PUT /usuarios/{id}/estado` | Dueño |
+| Clientes y catálogos | `GET /clientes` · `GET /clientes/{id}` · `GET /catalogos/{estados-vehiculo, estados-documentacion, roles, tipos-movimiento}` | Clientes: dueño · Catálogos: todos |
+
+**Códigos de respuesta:** 200 OK · 201 Created (con encabezado `Location`) · 204 No Content · 400 datos no válidos (detalle por campo) · 401 sin token o credenciales incorrectas · 403 rol sin permiso · 404 no existe · 409 regla del negocio · 429 demasiadas solicitudes · 500 error interno (con `traceId`).
+
+**Cómo probarla:** Swagger (botón *Authorize*), el archivo `SedsImports.Api/SedsImports.Api.http` en Visual Studio, o la colección `docs/postman/SedsImports-API.postman_collection.json` (el login guarda el token automáticamente).
+
+---
+
+## 3. Seguridad y protección
+
+| Medida | Dónde |
+|---|---|
+| ASP.NET Core Identity (cuentas, roles, hash PBKDF2 con sal, bloqueo 5 intentos / 15 min, política de contraseñas) | `Infrastructure/Identidad/` |
+| JWT firmado HMAC-SHA256 con emisor, audiencia y vencimiento validados | `Api/Seguridad/GeneradorToken.cs`, `ConfiguracionSeguridad.cs` |
+| Políticas de autorización por rol | `Api/Seguridad/Politicas.cs` → `[Authorize(Policy = ...)]` |
+| Web: autenticación con cookie cifrada, HttpOnly y SameSite=Strict; el token JWT viaja dentro de la cookie (el JavaScript no lo ve) | `Web/Program.cs`, `Web/Controllers/AccesoController.cs`, `ManejadorTokenApi.cs` |
+| CSRF: `AutoValidateAntiforgeryToken` en todos los POST, también en las llamadas Fetch (encabezado `X-CSRF-TOKEN`) | `Web/Program.cs`, `_Layout.cshtml`, `wwwroot/js/asincrono.js` |
+| XSS: Razor codifica toda la salida; el JavaScript usa `textContent`; Content-Security-Policy sin scripts en línea | `Web/Seguridad/EncabezadosSeguridad.cs` |
+| Validación en el servidor (DataAnnotations en DTOs y ViewModels, `[ApiController]` → 400) y en el cliente (jQuery Validation + JavaScript) | `Application/DTOs/Api/`, vistas |
+| Límite de solicitudes (10 intentos de login por minuto, 300 peticiones por minuto) | `Api/Configuracion/ProteccionConfiguracion.cs`, `Web/Program.cs` |
+| CORS solo para la aplicación web, HTTPS + HSTS, encabezados de seguridad, sin datos sensibles en respuestas ni en el token | `Api/Program.cs`, `Api/Middleware/` |
+
+## 4. Logging, errores y monitoreo
+
+- **Serilog:** consola + archivo diario `logs/api-AAAAMMDD.log` y `logs/web-AAAAMMDD.log` (14 días). Cada petición queda registrada con método, ruta, código y duración.
+- **Manejador global de excepciones** (`Api/Middleware/ManejadorExcepciones.cs`): registra el error con su `traceId` y responde ProblemDetails sin mostrar detalles internos.
+- **Eventos de seguridad** en el log: inicios de sesión correctos, contraseñas incorrectas y cuentas bloqueadas.
+- **Bitácora** del negocio (Fase 3) para la auditoría de cada acción.
+- **Salud:** `GET /health` comprueba la API y la conexión con la base de datos.
+
+## 5. Pruebas
+
+```
+dotnet test
+```
+
+33 pruebas de integración (`SedsImports.Tests`) levantan la API completa en memoria con una base SQLite temporal: autenticación (200/400/401), token alterado, CRUD de vehículos (201/204/400/404/409), autorización por rol (403), flujo completo del registro a la venta, documentación, usuarios, bitácora paginada, catálogos y Swagger.
+
+## 6. Despliegue en IIS
+
+Guía paso a paso en **`docs/DESPLIEGUE.md`**. Resumen (PowerShell como administrador):
+
+```
+powershell -ExecutionPolicy Bypass -File .\scripts\publicar-iis.ps1
+```
+
+Publica en `C:\inetpub\SedsImports`, crea los sitios **Web → http://localhost:8080** y **API → http://localhost:8081** (Swagger en `/swagger`, salud en `/health`) con su configuración de producción.
+
+---
+
+## 7. Qué puede hacer cada perfil
 
 | Acción | Patio | Mecánico | Asistente | Dueño |
 |---|:-:|:-:|:-:|:-:|
@@ -90,11 +154,11 @@ Todos usan la contraseña **`Seds2026`**. El dueño puede crear más usuarios de
 | Ventas, reportes, bitácora y trazabilidad | | | | ✔ |
 | **Usuarios: agregar, activar y desactivar** | | | | ✔ |
 
-Si alguien entra por URL a una sección que no le corresponde, el filtro `[PerfilRequerido]` lo envía a **Acceso denegado**.
+Si alguien entra por URL a una sección que no le corresponde, el filtro `[PerfilRequerido]` lo envía a **Acceso denegado**. En la API, las mismas reglas se aplican con **políticas de autorización** por rol (`[Authorize(Policy = ...)]`): un rol sin permiso recibe **403**.
 
 ---
 
-## 3. Flujo del vehículo y reglas del negocio
+## 8. Flujo del vehículo y reglas del negocio
 
 ```
 Recién llegado → En revisión/preparación → Pendiente de autorización → Disponible para venta → Apartado → Vendido
@@ -112,93 +176,43 @@ Recién llegado → En revisión/preparación → Pendiente de autorización →
 - No se puede vender dos veces el mismo vehículo. Si estaba apartado, la venta se registra a nombre del cliente del apartado (CU-06).
 - El reporte muestra los 12 meses del año; un período sin ventas aparece en cero (CU-08).
 - Toda acción queda en la **bitácora**, y cada vehículo tiene su **trazabilidad** cronológica.
-- Un usuario desactivado ya no puede iniciar sesión, y nadie puede desactivarse a sí mismo.
+- Un usuario desactivado ya no puede iniciar sesión (su cuenta de Identity queda bloqueada), y nadie puede desactivarse a sí mismo.
 - **Alta de usuarios:** el usuario de acceso se genera solo con `nombre.apellido@sedimports.com` (sin tildes ni ñ). Si ya existe, se le agrega un número (`lucia.mena2`). La contraseña debe tener al menos 8 caracteres y combinar letras y números. Solo se pueden crear usuarios de patio, mecánico y asistente: por decisión del dueño, él es el único dueño / vendedor y administrador del sistema.
 - **Eliminar vehículo:** solo el dueño, desde la ficha y con confirmación. Es una eliminación lógica: el vehículo desaparece de listados, tableros y búsquedas, pero sus datos y su trazabilidad se conservan, y la eliminación queda registrada en la bitácora con el VIN y el estado que tenía. En la bitácora del dueño, sus movimientos se marcan como **Eliminado** y su trazabilidad queda **solo para consulta**: ya no se puede abrir su ficha ni hacer ninguna acción con él. Un vehículo vendido no se elimina porque forma parte del historial de ventas; si estaba apartado, el apartado se cancela.
 - Las acciones importantes (autorizar, desactivar, eliminar) se confirman con ventanas propias del sistema, no con los avisos del navegador.
 
 ---
 
-## 4. Arquitectura por capas (Clean Architecture)
+## 9. Arquitectura por capas
 
 ```
 SedsImports.sln
-├── SedsImports.Domain/           Núcleo: no depende de nada
-│   ├── Entidades/                Vehiculo, Fotografia, Revision, NotaRevision, Documentacion, Cliente, Apartado, Venta, Rol, Usuario, MovimientoBitacora
-│   ├── Enums/                    Estados y tipos
-│   ├── Interfaces/               IRepositorio<T>, un repositorio por entidad e IUnidadDeTrabajo
-│   ├── Consultas/                Resultados de consultas LINQ (records)
-│   ├── Excepciones/              ErrorPersistenciaException
-│   └── Extensiones/              Nombres visibles de los enums
-├── SedsImports.Application/      Reglas del negocio → depende de Domain
-│   ├── Servicios/                VehiculoService, RevisionService, ... (heredan de ServicioBase)
-│   ├── Interfaces/               IVehiculoService, IRevisionService, ...
-│   ├── DTOs/  ViewModels/        Datos de salida y de entrada
-│   └── Comun/                    ResultadoOperacion, Permisos, Formato, Seguridad
-├── SedsImports.Infrastructure/   Acceso a datos con EF Core → depende de Domain
-│   ├── Datos/                    SedsImportsDbContext, Configuraciones (Fluent API), Migraciones, DatosIniciales
-│   ├── Repositorios/             RepositorioBase<T>, repositorios con LINQ y UnidadDeTrabajo
-│   └── DependencyInjection.cs    AgregarInfraestructura()
-├── SedsImports.Api/              API REST (Fase 4) → depende de Application e Infrastructure
-└── SedsImports.Web/              Presentación MVC → depende de Application e Infrastructure
-    ├── Controllers/ Views/ Filters/ Helpers/ Servicios/ wwwroot/
-    └── Program.cs                Inyección de dependencias e inicialización de la base de datos
+├── SedsImports.Domain/           Núcleo: entidades, enums, interfaces de repositorios (no depende de nada)
+├── SedsImports.Application/      Reglas del negocio → Domain
+│   ├── Servicios/ Interfaces/    VehiculoService, UsuarioService (usa IServicioIdentidad), ...
+│   ├── DTOs/Api/                 DTOs de entrada y salida de la API con validaciones
+│   ├── Mapeos/                   Conversión entidad ↔ DTO ↔ ViewModel (métodos de extensión)
+│   └── DependencyInjection.cs    AgregarAplicacion()
+├── SedsImports.Infrastructure/   EF Core + Identity → Domain, Application
+│   ├── Datos/ Repositorios/      Fase 3 (DbContext, Fluent API, migraciones, repositorios, Unidad de Trabajo)
+│   └── Identidad/                IdentidadDbContext (esquema seguridad), ServicioIdentidad, migración AgregarIdentidad
+├── SedsImports.Api/              API REST → Application, Infrastructure
+│   ├── Controllers/              Auth, Vehiculos, Revisiones, Documentacion, Apartados, Ventas, Reportes, Bitacora, Usuarios, Clientes, Catalogos
+│   ├── Seguridad/                JWT, políticas, usuario del token
+│   ├── Configuracion/            Swagger, protección (límite de solicitudes, CORS, salud)
+│   └── Middleware/               Manejador de excepciones y encabezados de seguridad
+├── SedsImports.Web/              MVC → consume la API (HttpClient) y usa las capas de aplicación
+│   ├── Servicios/Api/            ISedsApiCliente, ManejadorTokenApi
+│   └── Controllers/DatosController.cs + wwwroot/js/asincrono.js   Fetch API
+└── SedsImports.Tests/            Pruebas de integración de la API (xUnit)
 ```
 
-**Recorrido de una petición** (registrar un vehículo):
-`Vista Create` → `VehiculosController.Create (POST)` → `IVehiculoService.RegistrarAsync` → `IVehiculoRepository.Agregar` + `IBitacoraService.Registrar` → `IUnidadDeTrabajo.GuardarCambios()` (un solo `SaveChanges` dentro de una transacción) → `RedirectToAction("Registrado")`.
-
-### Persistencia (Fase 3)
-
-| Tema | Dónde está |
-|---|---|
-| DbContext y DbSet | `Infrastructure/Datos/SedsImportsDbContext.cs` |
-| Fluent API (llaves, longitudes, índices únicos, relaciones 1-1 y 1-N, restricciones CHECK) | `Infrastructure/Datos/Configuraciones/*Configuracion.cs` |
-| Eliminación lógica | Filtro global `HasQueryFilter(v => !v.Eliminado)` e índice único del VIN filtrado |
-| Migraciones | `Infrastructure/Datos/Migraciones/` (`InitialCreate`) |
-| Datos iniciales | `Infrastructure/Datos/DatosIniciales.cs` (se cargan si la base está vacía) |
-| LINQ: filtros, ordenamiento, agrupaciones, joins | `VehiculoRepository.Buscar` / `ContarPorEstado`, `VentaRepository.ResumenMensual` / `ResumenPorMarca`, `RevisionRepository.NotasRecientes`, `BitacoraRepository.Buscar` |
-| Repositorio genérico + específicos | `Infrastructure/Repositorios/` (interfaces en `Domain/Interfaces/`) |
-| Unidad de Trabajo y transacciones | `UnidadDeTrabajo.cs`; `VehiculoService.RegistrarAsync` usa una transacción explícita |
-| Manejo de errores | `ErrorPersistenciaException` → `ServicioBase.Guardar` → mensaje al usuario; filtro global `ErrorPersistenciaFilter` |
-
-### Dónde se ve cada subpunto de la actividad
-
-| Subpunto | Dónde mostrarlo |
-|---|---|
-| 4.2 Model Binding | Todos los POST reciben ViewModels (`VehiculosController.Create(VehiculoFormViewModel)`). `Ventas/Reporte` hace binding desde el *query string*. |
-| 4.3 Validación | `[Required]`, `[Range]`, `[StringLength]`, `[RegularExpression]`, `IValidatableObject` (`DocumentacionViewModel`, `FinalizarRevisionViewModel`) y reglas del servicio (VIN duplicado). Funciona en el navegador y en el servidor. |
-| 4.5 DTOs | `Application/DTOs/Dtos.cs`: `VehiculoListadoDto`, `ReporteVentasDto`, `VentaMensualDto`, etc. |
-| 5.3 Secciones | `@RenderSectionAsync("Scripts")` en `_Layout`; `@section Scripts { ... }` en los formularios. |
-| 5.4 HTML Helpers | `Ventas/Reporte` (`Html.DropDownListFor`, `Html.TextBoxFor`, `Html.LabelFor`) y `Html.DisplayNameFor` en los formularios. |
-| 5.5 Tag Helpers | `asp-for`, `asp-action`, `asp-route-*`, `asp-validation-for`, `asp-items`, `<partial>`. |
-| 5.6 Vistas parciales | `_Mensajes`, `_EstadoBadge`, `_VehiculoFila`, `_DatosCliente`, `_Pasos`, `_Foto`, `_FormApartado`, `_FormVenta`, `_FormDocumentacion`, `Home/_Inicio*`. |
-| 6.2 Action Results | `View`, `RedirectToAction`, `Redirect`, `LocalRedirect`, `NotFound`. |
-| 6.3 Rutas | Ruta convencional en `Program.cs` y rutas por atributo en `VehiculosController` (`/vehiculos/5/editar`). |
-| 6.5 Inyección de dependencias | `Program.cs` + `AgregarInfraestructura()`: DbContext, repositorios, Unidad de Trabajo y servicios como Scoped, todo por interfaz. |
-| 3.5 Responsive | Menú lateral que se convierte en menú hamburguesa; las tablas se vuelven tarjetas en el celular. |
+**Recorrido de una petición a la API** (registrar vehículo): `POST /api/vehiculos` + token → `JwtBearer` valida el token → política `GestionPatio` → `[ApiController]` valida `CrearVehiculoDto` → `VehiculosController` → `IVehiculoService.RegistrarAsync` (mismas reglas que la web) → Unidad de Trabajo → `201 Created` con `Location`.
 
 ---
 
-## 5. Equipo y flujo de trabajo
+## 10. Equipo y flujo de trabajo
 
-**Integrantes**
-
-- Abner Isaí Díaz Rivera
-- Elías Grande Beltrán
-- Marlene Yamileth Pérez Alvarado
-- Jason Steven Durán López
-
-**Cómo trabajamos con Git**
-
-- `main` contiene la versión estable del proyecto.
-- Cada integrante trabaja en su propia rama (`feature/...`) y hace sus propios commits con mensajes descriptivos.
-- Al terminar su parte, cada integrante abre un Pull Request hacia `main`, que se revisa antes de fusionarse.
-- Fase 3: el trabajo se reparte por capas: dominio (Elías), Entity Framework y base de datos (Marlene), repositorios y LINQ (Jason), servicios e integración web (Abner).
-- Fase 4: API REST (Elías), seguridad con Identity y JWT (Marlene), endpoints de operaciones, Swagger y pruebas (Jason), protección, comunicación asíncrona, logging y despliegue (Abner).
-
-## 6. Notas
-
-- El inicio de sesión usa usuario y contraseña, como en el prototipo de Figma. La pantalla no muestra credenciales; los usuarios de prueba están en la sección 1 de este README.
-- Iniciar la revisión, agregar anotaciones y subir fotografías se hace desde la ficha del vehículo. `Revisiones/Editar` es el formulario para finalizar la revisión (resumen y pendientes).
-- La autenticación y autorización formales (ASP.NET Core Identity) se implementan en la Fase 4. Por ahora las contraseñas se guardan con hash SHA-256.
+- Abner Isaí Díaz Rivera · Elías Grande Beltrán · Marlene Yamileth Pérez Alvarado · Jason Steven Durán López
+- `main` tiene la versión estable; cada integrante trabaja en su rama `feature/...` y la integra con un Pull Request.
+- **Fase 4:** API REST (Elías), seguridad con Identity y JWT (Marlene), endpoints de operaciones, Swagger y pruebas (Jason), protección, comunicación asíncrona, logging y despliegue (Abner).

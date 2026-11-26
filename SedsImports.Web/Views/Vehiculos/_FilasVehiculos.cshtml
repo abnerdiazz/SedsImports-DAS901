@@ -1,0 +1,6 @@
+@model List<VehiculoListadoDto>
+@* Filas de la tabla de vehículos. Se usa al cargar la página y en la búsqueda en vivo (Fetch API → /datos/vehiculos). *@
+@foreach (var v in Model)
+{
+    <partial name="_VehiculoFila" model="v" />
+}

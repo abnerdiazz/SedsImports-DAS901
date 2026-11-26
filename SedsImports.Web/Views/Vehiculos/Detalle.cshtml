@@ -271,11 +271,13 @@
 
                 @if (Model.EsMecanico && estado == EstadoVehiculo.EnRevision)
                 {
-                    <form asp-controller="Revisiones" asp-action="AgregarNota" method="post" style="margin:12px 0 6px">
+                    <form asp-controller="Revisiones" asp-action="AgregarNota" method="post" style="margin:12px 0 6px"
+                          data-nota-async data-url="@Url.Action("AgregarNota", "Datos", new { vehiculoId = v.Id })" data-destino="#lista-notas">
                         <input type="hidden" name="VehiculoId" value="@v.Id" />
                         <label class="etiqueta" for="nota-texto">Nueva anotación</label>
                         <textarea class="campo" id="nota-texto" name="Texto" required minlength="3" maxlength="500" placeholder="Ej.: Cambio de aceite y filtros realizado."></textarea>
                         <div class="acciones" style="margin-top:10px"><button type="submit" class="btn btn-oscuro">Agregar anotación</button></div>
+                        <p class="ayuda" data-estado-envio role="status"></p>
                     </form>
                 }
                 else if (Model.EsMecanico && estado == EstadoVehiculo.RecienLlegado)
@@ -283,16 +285,18 @@
                     <p class="ayuda" style="margin:8px 0">Inicia la revisión para poder agregar anotaciones.</p>
                 }
 
-                @foreach (var n in notas)
-                {
-                    <div class="nota @(n.EsDelSistema ? "nota-sistema" : "")">
-                        <div class="nota-meta">@Formato.FechaHora(n.Fecha) · @n.UsuarioNombre</div>
-                        <div class="nota-texto">@n.Texto</div>
-                    </div>
-                }
+                <div id="lista-notas" aria-live="polite">
+                    @foreach (var n in notas)
+                    {
+                        <div class="nota @(n.EsDelSistema ? "nota-sistema" : "")">
+                            <div class="nota-meta">@Formato.FechaHora(n.Fecha) · @n.UsuarioNombre</div>
+                            <div class="nota-texto">@n.Texto</div>
+                        </div>
+                    }
+                </div>
                 @if (!notas.Any())
                 {
-                    <p class="encabezado-sub" style="margin-top:8px">Aún no hay anotaciones de revisión.</p>
+                    <p class="encabezado-sub" style="margin-top:8px" data-sin-notas>Aún no hay anotaciones de revisión.</p>
                 }
             </section>
         }
