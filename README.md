@@ -3,6 +3,13 @@
 Sistema web de la **Fase 4 (Servicios Web, Seguridad y Despliegue)** de DAS901 — proyecto final.
 ASP.NET Core (**.NET 10**) con arquitectura por capas (Domain, Application, Infrastructure, **Api** y Web), **Entity Framework Core 10**, **SQL Server LocalDB**, **API REST** con **JWT** y **ASP.NET Core Identity**, documentación con **Swagger**, logging con **Serilog**, pruebas automáticas con **xUnit** y despliegue en **IIS**.
 
+> [!IMPORTANT]
+> **🎬 Video demostrativo de la Fase 4:** https://youtu.be/MjtgkQOvVxc
+>
+> [![Video de la Fase 4 en YouTube](https://img.youtube.com/vi/MjtgkQOvVxc/hqdefault.jpg)](https://youtu.be/MjtgkQOvVxc)
+
+**Videos de las fases anteriores:** [Fase 3 – Persistencia de Datos y Arquitectura Empresarial](https://youtu.be/cvyGGc9cujc)
+
 ## Tecnologías
 
 | Tecnología | Uso en el proyecto |
